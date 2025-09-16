@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ config('app.name', 'GestoCar') }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -17,37 +17,27 @@
 </head>
 
 <body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-100">
+    <div class="min-h-screen flex flex-col bg-gradient-to-b from-blue-900 to-white">
+        
+        <!-- Header -->
         @include('layouts.navigation')
 
-        <!-- Page Heading -->
-        @isset($header)
-        <header class="bg-white shadow">
-            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                {{ $header }}
-            </div>
-        </header>
-        @endisset
-
-        <!-- Page Content -->
-        <main>
+        <!-- Conteúdo -->
+        <main class="flex-grow pt-20 px-6">
             {{ $slot }}
         </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-gray-200 py-6 mt-8">
+            <div class="container mx-auto text-center text-sm text-gray-600">
+                <p>© {{ date('Y') }} GestoCar</p>
+                <div class="mt-2 flex justify-center gap-4">
+                    <a href="#" class="hover:text-blue-600">Política de Privacidade</a>
+                    <a href="#" class="hover:text-blue-600">Termos de Uso</a>
+                    <a href="#" class="hover:text-blue-600">Contato</a>
+                </div>
+            </div>
+        </footer>
     </div>
-
-    <!-- Footer -->
-<footer class="bg-white border-t border-gray-200 py-6 mt-8">
-    <div class="container mx-auto text-center text-sm text-gray-600">
-        <p>© {{ date('Y') }} GestoCar</p>
-        <div class="mt-2 flex justify-center gap-4">
-            <a href="#" class="hover:text-blue-600">Política de Privacidade</a>
-            <a href="#" class="hover:text-blue-600">Termos de Uso</a>
-            <a href="#" class="hover:text-blue-600">Contato</a>
-        </div>
-    </div>
-</footer>
-
-
 </body>
-
 </html>

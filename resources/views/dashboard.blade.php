@@ -1,9 +1,9 @@
 <x-app-layout>
-    <div class="py-8 px-6 bg-gradient-to-b from-blue-900 to-white min-h-screen">
+    <div class="py-8 px-6">
 
         <!-- Saudação -->
         <h1 class="text-2xl font-bold text-white mb-8">
-            Bom dia, {{ strtoupper(Auth::user()->name) }} 👋
+            Ola, {{ strtoupper(Auth::user()->name) }} 👋
         </h1>
 
         <!-- Grid de Cards -->

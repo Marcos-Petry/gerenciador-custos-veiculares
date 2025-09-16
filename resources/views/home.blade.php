@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Início')
+@section('title', 'GestoCar')
 
 @push('head')
   {{-- SEO básico + scroll suave + offset para header fixo --}}
