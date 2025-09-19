@@ -24,7 +24,8 @@
 
         <!-- Conteúdo -->
         <main class="flex-grow pt-20 px-6">
-            {{ $slot }}
+            @yield('content')
+            {{ $slot ?? '' }}
         </main>
 
         <!-- Footer -->

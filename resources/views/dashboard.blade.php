@@ -1,20 +1,22 @@
-<x-app-layout>
+@extends('layouts.app')
+
+@section('content')
     <div class="py-8 px-6">
 
         <!-- Saudação -->
         <h1 class="text-2xl font-bold text-white mb-8">
-            Ola, {{ strtoupper(Auth::user()->name) }} 👋
+            Olá, {{ strtoupper(Auth::user()->name) }} 👋
         </h1>
 
         <!-- Grid de Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
-            <a href="#" class="bg-white rounded-2xl shadow-lg p-6 transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:scale-105 hover:bg-gray-200">
+            <a href="{{ route('veiculo.index') }}" class="bg-white rounded-2xl shadow-lg p-6 transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:scale-105 hover:bg-gray-200">
                 <div class="text-3xl mb-3">🚗</div>
                 <h2 class="font-semibold text-lg">Veículos</h2>
                 <p class="text-sm text-gray-600 mt-2">Gerencie seus veículos.</p>
             </a>
 
-            <a href="#" class="bg-white rounded-2xl shadow-lg p-6 transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:scale-105 hover:bg-gray-200">
+            <a href="{{ route('frota.index') }}" class="bg-white rounded-2xl shadow-lg p-6 transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:scale-105 hover:bg-gray-200">
                 <div class="text-3xl mb-3">🚌</div>
                 <h2 class="font-semibold text-lg">Frotas</h2>
                 <p class="text-sm text-gray-600 mt-2">Organize grupos de veículos.</p>
@@ -41,15 +43,15 @@
 
         <!-- Resumo -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-            <div class="bg-white rounded-2xl shadow-lg p-6 transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:scale-105 text-center hover:bg-gray-200">
+            <div class="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-2xl hover:-translate-y-2 hover:scale-105 hover:bg-gray-200 transition">
                 <p class="text-gray-600">Total de Veículos</p>
                 <p class="text-2xl font-bold text-blue-600">12</p>
             </div>
-            <div class="bg-white rounded-2xl shadow-lg p-6 transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:scale-105 text-center hover:bg-gray-200">
+            <div class="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-2xl hover:-translate-y-2 hover:scale-105 hover:bg-gray-200 transition">
                 <p class="text-gray-600">Gastos este mês</p>
                 <p class="text-2xl font-bold text-green-600">R$ 2.345,00</p>
             </div>
-            <div class="bg-white rounded-2xl shadow-lg p-6 transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:scale-105 text-center hover:bg-gray-200">
+            <div class="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-2xl hover:-translate-y-2 hover:scale-105 hover:bg-gray-200 transition">
                 <p class="text-gray-600">Responsáveis Ativos</p>
                 <p class="text-2xl font-bold text-purple-600">5</p>
             </div>
@@ -104,4 +106,4 @@
                 }
             });
         </script>
-</x-app-layout>
+@endsection
