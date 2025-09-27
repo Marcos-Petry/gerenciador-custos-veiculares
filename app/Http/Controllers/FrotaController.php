@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Frota;
+use App\Models\Veiculo;
+use App\Models\Notificacao;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class FrotaController extends Controller
@@ -15,7 +18,6 @@ class FrotaController extends Controller
 
         return view('frota.index', compact('frotas', 'origemCampoExterno'));
     }
-
 
     public function create(Request $request)
     {
@@ -30,41 +32,69 @@ class FrotaController extends Controller
             'foto' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
             'veiculos' => 'array',
             'veiculos.*' => 'exists:veiculo,veiculo_id',
+            'responsaveis' => 'array',
+            'responsaveis.*' => 'exists:users,id',
             'visibilidade' => 'required|in:0,1',
         ]);
 
-        // Dono da frota
-        $data['usuario_dono_id'] = \Illuminate\Support\Facades\Auth::id();
+        $data['usuario_dono_id'] = Auth::id();
 
-        // Upload da foto (se enviada)
+        // Upload da foto
         if ($request->hasFile('foto')) {
             $data['foto'] = $request->file('foto')->store('frotas/fotos', 'public');
         }
 
-        // Cria a frota
         $frota = Frota::create($data);
 
-        // Se houver veículos selecionados, relaciona-os com a frota
+        // Relaciona veículos
         if (!empty($data['veiculos'])) {
-            \App\Models\Veiculo::whereIn('veiculo_id', $data['veiculos'])
+            Veiculo::whereIn('veiculo_id', $data['veiculos'])
                 ->update(['frota_id' => $frota->frota_id]);
+        }
+
+        // Convites para responsáveis
+        if ($request->filled('responsaveis')) {
+            $this->criarNotificacoesResponsaveis($frota, $request->responsaveis);
         }
 
         return redirect()->route('frota.index')
             ->with('success', 'Frota criada com sucesso!');
     }
 
-    public function show($id)
+    public function show(Frota $frota)
     {
-        $frota = \App\Models\Frota::with(['veiculos', 'dono'])->findOrFail($id);
+        $frota->load(['dono', 'veiculos', 'responsavel']);
 
-        return view('frota.show', compact('frota'));
+        // Convites pendentes
+        $convitesPendentes = Notificacao::with('destinatario')
+            ->where('frota_id', $frota->frota_id)
+            ->where('tipo', Notificacao::TIPO_CONVITE_FROTA)
+            ->where('status', Notificacao::STATUS_PENDENTE)
+            ->orderByDesc('data_envio')
+            ->get();
+
+        // Convites respondidos
+        $convitesRespondidos = Notificacao::with('destinatario')
+            ->where('frota_id', $frota->frota_id)
+            ->where('tipo', Notificacao::TIPO_CONVITE_FROTA)
+            ->whereIn('status', [Notificacao::STATUS_ACEITO, Notificacao::STATUS_RECUSADO])
+            ->orderByDesc('data_resposta')
+            ->get();
+
+        return view('frota.show', compact('frota', 'convitesPendentes', 'convitesRespondidos'));
     }
-
 
     public function edit(Frota $frota)
     {
-        return view('frota.edit', compact('frota'));
+        // Convites pendentes para exibir e poder cancelar
+        $convitesPendentes = Notificacao::with('destinatario')
+            ->where('frota_id', $frota->frota_id)
+            ->where('tipo', Notificacao::TIPO_CONVITE_FROTA)
+            ->where('status', Notificacao::STATUS_PENDENTE)
+            ->orderByDesc('data_envio')
+            ->get();
+
+        return view('frota.edit', compact('frota', 'convitesPendentes'));
     }
 
     public function update(Request $request, Frota $frota)
@@ -75,51 +105,102 @@ class FrotaController extends Controller
             'foto' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
             'veiculos' => 'array',
             'veiculos.*' => 'exists:veiculo,veiculo_id',
+            'responsaveis' => 'array',
+            'responsaveis.*' => 'exists:users,id',
             'visibilidade' => 'required|in:0,1',
         ]);
 
-        // Upload da foto (se enviada)
+        // Atualiza foto
         if ($request->hasFile('foto')) {
+            if ($frota->foto && Storage::disk('public')->exists($frota->foto)) {
+                Storage::disk('public')->delete($frota->foto);
+            }
             $data['foto'] = $request->file('foto')->store('frotas/fotos', 'public');
         }
 
-        // Atualiza os dados da frota
         $frota->update($data);
 
-        // 🔹 Primeiro, "desassocia" os veículos que estavam ligados à frota mas não foram selecionados
-        \App\Models\Veiculo::where('frota_id', $frota->frota_id)
+        // Atualiza veículos
+        Veiculo::where('frota_id', $frota->frota_id)
             ->whereNotIn('veiculo_id', $data['veiculos'] ?? [])
             ->update(['frota_id' => null]);
 
-        // 🔹 Agora associa os veículos selecionados
         if (!empty($data['veiculos'])) {
-            \App\Models\Veiculo::whereIn('veiculo_id', $data['veiculos'])
+            Veiculo::whereIn('veiculo_id', $data['veiculos'])
                 ->update(['frota_id' => $frota->frota_id]);
+        }
+
+        // Atualiza convites
+        if ($request->filled('responsaveis')) {
+            $this->atualizarNotificacoesResponsaveis($frota, $request->responsaveis);
         }
 
         return redirect()->route('frota.index')
             ->with('success', 'Frota atualizada com sucesso!');
     }
 
-
     public function destroy(Frota $frota)
     {
-        // 🔹 Primeiro, desassocia todos os veículos ligados a essa frota
-        \App\Models\Veiculo::where('frota_id', $frota->frota_id)
+        // Desvincula veículos
+        Veiculo::where('frota_id', $frota->frota_id)
             ->update(['frota_id' => null]);
 
-        // 🔹 Se houver foto associada, remove do storage
         if ($frota->foto && Storage::disk('public')->exists($frota->foto)) {
             Storage::disk('public')->delete($frota->foto);
         }
 
-        // 🔹 Agora exclui a frota
         $frota->delete();
 
         return redirect()->route('frota.index')
             ->with('success', 'Frota excluída com sucesso!');
     }
 
+    /**
+     * Cria convites de responsáveis de frota
+     */
+    private function criarNotificacoesResponsaveis(Frota $frota, array $responsaveis): void
+    {
+        // evita criar convite pra quem já é responsável ativo
+        $ativos = $frota->responsavel()->pluck('users.id')->toArray();
 
-    public function select() {}
+        foreach ($responsaveis as $userId) {
+            if (in_array($userId, $ativos)) {
+                continue;
+            }
+
+            Notificacao::create([
+                'usuario_remetente_id' => Auth::id(),
+                'usuario_destinatario_id' => $userId,
+                'veiculo_id' => null,
+                'frota_id' => $frota->frota_id,
+                'tipo' => Notificacao::TIPO_CONVITE_FROTA,
+                'status' => Notificacao::STATUS_PENDENTE,
+            ]);
+        }
+    }
+
+    /**
+     * Atualiza convites de responsáveis de frota
+     */
+    private function atualizarNotificacoesResponsaveis(Frota $frota, array $novosResponsaveis): void
+    {
+        // Remove convites que não estão mais na lista
+        Notificacao::where('frota_id', $frota->frota_id)
+            ->where('tipo', Notificacao::TIPO_CONVITE_FROTA)
+            ->whereNotIn('usuario_destinatario_id', $novosResponsaveis)
+            ->delete();
+
+        // Já existentes (convites pendentes)
+        $existentes = Notificacao::where('frota_id', $frota->frota_id)
+            ->where('tipo', Notificacao::TIPO_CONVITE_FROTA)
+            ->pluck('usuario_destinatario_id')
+            ->toArray();
+
+        // Responsáveis ativos não devem receber convite
+        $ativos = $frota->responsavel()->pluck('users.id')->toArray();
+
+        $novos = array_diff($novosResponsaveis, $existentes, $ativos);
+
+        $this->criarNotificacoesResponsaveis($frota, $novos);
+    }
 }

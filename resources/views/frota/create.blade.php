@@ -39,7 +39,6 @@
                     @endif
                 </div>
 
-                <!-- BOTÃO COM SCRIPT -->
                 <button type="button"
                     onclick="abrirSelecaoVeiculos()"
                     class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition">
@@ -50,16 +49,37 @@
 
         <!-- Responsáveis -->
         <div>
-            <label class="block text-sm font-semibold text-gray-700">Responsáveis</label>
-            <div class="mt-2 flex rounded-lg border border-gray-300 shadow-sm overflow-hidden">
-                <div class="flex-grow px-3 py-2 text-sm text-gray-600 bg-white">
-                    Nenhum responsável adicionado
-                </div>
-                <a href="#"
+            <label class="block text-sm font-semibold text-gray-700">Responsáveis (opcional)</label>
+            <div class="flex gap-2">
+                <input type="email" id="responsavel_email"
+                    placeholder="Digite o e-mail do responsável"
+                    class="flex-grow px-3 py-2 text-sm border rounded-lg focus:outline-none">
+                <button type="button" onclick="buscarResponsavel()"
                     class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition">
                     🔎 Buscar
-                </a>
+                </button>
             </div>
+            <p id="responsavel_feedback" class="text-sm mt-2"></p>
+
+            <!-- Lista dinâmica -->
+            <ul id="responsaveis_lista" class="mt-3 space-y-2">
+                @if(request()->has('responsaveis'))
+                @foreach(request('responsaveis') as $respId)
+                @php
+                $user = \App\Models\User::find($respId);
+                @endphp
+                @if($user)
+                <li id="responsavel_{{ $user->id }}" class="flex justify-between items-center bg-gray-100 p-2 rounded-lg">
+                    <span>✅ {{ $user->name }} ({{ $user->email }})</span>
+                    <button type="button"
+                        onclick="removerResponsavel(parseInt('{{ $user->id }}'))"
+                        class="text-red-600 font-bold">✖</button>
+                    <input type="hidden" name="responsaveis[]" value="{{ $user->id }}">
+                </li>
+                @endif
+                @endforeach
+                @endif
+            </ul>
         </div>
 
         <!-- Descrição -->
@@ -111,7 +131,6 @@
             @error('visibilidade') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
         </div>
 
-
         <!-- Botões -->
         <div class="flex justify-between">
             <a href="{{ route('frota.index') }}"
@@ -126,7 +145,7 @@
     </form>
 </div>
 
-<!-- SCRIPT para levar os dados digitados até a seleção de veículos -->
+<!-- SCRIPT -->
 <script>
     function abrirSelecaoVeiculos() {
         const params = new URLSearchParams();
@@ -134,16 +153,75 @@
 
         const nome = document.querySelector('[name="nome"]')?.value || '';
         const descricao = document.querySelector('[name="descricao"]')?.value || '';
+        const visibilidade = document.querySelector('[name="visibilidade"]:checked')?.value || '';
 
         if (nome) params.set('nome', nome);
         if (descricao) params.set('descricao', descricao);
+        if (visibilidade) params.set('visibilidade', visibilidade);
 
-        // mantém veiculos já selecionados
+        // mantém veículos já selecionados
         document.querySelectorAll('[name="veiculos[]"]').forEach(input => {
             params.append('veiculos[]', input.value);
         });
 
+        // mantém responsáveis já adicionados
+        document.querySelectorAll('[name="responsaveis[]"]').forEach(input => {
+            params.append('responsaveis[]', input.value);
+        });
+
         window.location.href = "{{ route('veiculo.index') }}" + "?" + params.toString();
+    }
+
+    async function buscarResponsavel() {
+        const emailInput = document.getElementById('responsavel_email');
+        const email = emailInput.value.trim();
+        const feedback = document.getElementById('responsavel_feedback');
+        const lista = document.getElementById('responsaveis_lista');
+
+        if (!emailInput.checkValidity()) {
+            feedback.textContent = "⚠️ Informe um e-mail válido.";
+            feedback.className = "text-red-600 text-sm mt-2";
+            return;
+        }
+
+        try {
+            const response = await fetch(`{{ route('usuario.buscar') }}?email=${encodeURIComponent(email)}`);
+            const data = await response.json();
+
+            if (!data.success) {
+                feedback.textContent = data.message;
+                feedback.className = "text-red-600 text-sm mt-2";
+                return;
+            }
+
+            if (document.getElementById(`responsavel_${data.user.id}`)) {
+                feedback.textContent = "⚠️ Esse responsável já foi adicionado.";
+                feedback.className = "text-yellow-600 text-sm mt-2";
+                return;
+            }
+
+            const li = document.createElement("li");
+            li.className = "flex justify-between items-center bg-gray-100 p-2 rounded-lg";
+            li.id = `responsavel_${data.user.id}`;
+            li.innerHTML = `
+                <span>✅ ${data.user.name} (${data.user.email})</span>
+                <button type="button" onclick="removerResponsavel(${data.user.id})" class="text-red-600 font-bold">✖</button>
+                <input type="hidden" name="responsaveis[]" value="${data.user.id}">
+            `;
+            lista.appendChild(li);
+
+            feedback.textContent = "";
+            emailInput.value = "";
+
+        } catch (err) {
+            feedback.textContent = "⚠️ Erro na busca. Verifique a conexão.";
+            feedback.className = "text-red-600 text-sm mt-2";
+        }
+    }
+
+    function removerResponsavel(id) {
+        const li = document.getElementById(`responsavel_${id}`);
+        if (li) li.remove();
     }
 </script>
 @endsection

@@ -34,4 +34,10 @@ class Frota extends Model
     {
         return $this->visibilidade == 1 ? 'Público' : 'Privado';
     }
+
+    public function responsavel()
+    {
+        return $this->belongsToMany(User::class, 'responsavelfrota', 'frota_id', 'usucodigo')
+            ->withTimestamps();
+    }
 }

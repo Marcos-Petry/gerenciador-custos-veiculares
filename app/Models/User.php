@@ -47,4 +47,16 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function veiculosResponsavel()
+    {
+        return $this->belongsToMany(Veiculo::class, 'responsavelveiculo', 'usucodigo', 'veiculo_id')
+            ->withTimestamps();
+    }
+
+    public function frotasResponsavel()
+    {
+        return $this->belongsToMany(Frota::class, 'responsavelfrota', 'usucodigo', 'frota_id')
+            ->withTimestamps();
+    }
 }

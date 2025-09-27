@@ -44,4 +44,10 @@ class Veiculo extends Model
     {
         return $this->visibilidade == 1 ? 'Público' : 'Privado';
     }
+
+    public function responsavel()
+    {
+        return $this->belongsToMany(User::class, 'responsavelveiculo', 'veiculo_id', 'usucodigo')
+            ->withTimestamps();
+    }
 }
