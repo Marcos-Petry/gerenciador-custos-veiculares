@@ -13,7 +13,10 @@ class VeiculoController extends Controller
 {
     public function index(Request $request)
     {
-        $veiculos = Veiculo::with('frota')->paginate(6);
+        $veiculos = Veiculo::with('frota')
+            ->where('usuario_dono_id', Auth::id())
+            ->paginate(6);
+
         $origemCampoExterno = $request->boolean('origemCampoExterno', false);
 
         return view('veiculo.index', compact('veiculos', 'origemCampoExterno'));

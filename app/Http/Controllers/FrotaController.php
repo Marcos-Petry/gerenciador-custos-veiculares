@@ -13,7 +13,10 @@ class FrotaController extends Controller
 {
     public function index(Request $request)
     {
-        $frotas = Frota::with('veiculos')->paginate(6);
+        $frotas = Frota::with('veiculos')
+            ->where('usuario_dono_id', Auth::id())
+            ->paginate(6);
+
         $origemCampoExterno = $request->boolean('origemCampoExterno', false);
 
         return view('frota.index', compact('frotas', 'origemCampoExterno'));

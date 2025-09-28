@@ -33,7 +33,7 @@ Route::middleware('auth')->group(function () {
     // routes/web.php (dentro do middleware auth)
     Route::match(['POST', 'DELETE'], '/notificacao/{notificacao}/cancelar', [NotificacaoController::class, 'cancelar'])
         ->name('notificacao.cancelar');
-
+    Route::get('/notificacao', [NotificacaoController::class, 'index'])->name('notificacao.index');
 
 
     // buscar por email no campo de add responsável

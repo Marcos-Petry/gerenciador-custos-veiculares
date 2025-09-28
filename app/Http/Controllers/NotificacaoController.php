@@ -11,6 +11,35 @@ use Illuminate\Support\Facades\Auth;
 
 class NotificacaoController extends Controller
 {
+
+public function index(Request $request)
+{
+    $filtro = $request->get('status', 'pendentes'); // padrão = pendentes
+
+    $query = Notificacao::where('usuario_destinatario_id', Auth::id())
+        ->latest();
+
+    switch ($filtro) {
+        case 'aceitas':
+            $query->where('status', Notificacao::STATUS_ACEITO);
+            break;
+        case 'recusadas':
+            $query->where('status', Notificacao::STATUS_RECUSADO);
+            break;
+        case 'todas':
+            // sem filtro extra → mostra tudo
+            break;
+        default: // pendentes
+            $query->where('status', Notificacao::STATUS_PENDENTE);
+    }
+
+    $notificacoes = $query->paginate(10);
+
+    return view('notificacao.index', compact('notificacoes', 'filtro'));
+}
+
+
+
     // Enviar convite
     public function enviar(Request $request)
     {
