@@ -46,7 +46,9 @@
         <!-- Grid de Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($veiculos as $veiculo)
-            <div class="bg-white rounded-2xl shadow-lg overflow-hidden transform transition hover:shadow-2xl hover:-translate-y-2 hover:scale-105">
+            <div
+                class="bg-white rounded-2xl shadow-lg overflow-hidden transform transition hover:shadow-2xl hover:-translate-y-2 hover:scale-[1.02]">
+
                 <!-- Foto -->
                 @if($veiculo->foto)
                 <div class="w-full h-40 bg-gray-100 flex items-center justify-center overflow-hidden">
@@ -76,23 +78,44 @@
                     </p>
 
                     @if($origemCampoExterno)
-                    <!-- Checkbox para selecionar múltiplos veículos -->
+                    <!-- Checkbox para seleção -->
                     <div class="mt-4 flex items-center">
                         <input type="checkbox" name="veiculos[]" value="{{ $veiculo->veiculo_id }}"
                             class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                         <span class="ml-2 text-sm text-gray-600">Selecionar</span>
                     </div>
                     @else
-                    <!-- Ações normais -->
-                    <div class="flex justify-between mt-4">
-                        <a href="{{ route('veiculo.show', $veiculo) }}" class="text-blue-600 hover:underline">👁 Ver</a>
-                        <a href="{{ route('veiculo.edit', $veiculo) }}" class="text-yellow-600 hover:underline">✏ Editar</a>
+                    <!-- 🔹 Ações -->
+                    <div class="flex justify-center mt-5 gap-6 border-t pt-3 text-sm font-medium">
+                        <!-- Ver -->
+                        <a href="{{ route('veiculo.show', $veiculo) }}"
+                            class="flex items-center text-blue-600 hover:text-blue-800 transition gap-1">
+                            👁 <span>Ver</span>
+                        </a>
+
+                        <!-- Apenas o dono pode editar/excluir -->
+                        @if($veiculo->usuario_dono_id === Auth::id())
+                        <a href="{{ route('veiculo.edit', $veiculo) }}"
+                            class="flex items-center text-yellow-600 hover:text-yellow-800 transition gap-1">
+                            ✏ <span>Editar</span>
+                        </a>
+
                         <form action="{{ route('veiculo.destroy', $veiculo) }}" method="POST"
-                            onsubmit="return confirm('Excluir veículo?')">
+                            onsubmit="return confirm('Excluir veículo?')" class="inline">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:underline">🗑 Excluir</button>
+                            <button type="submit"
+                                class="flex items-center text-red-600 hover:text-red-800 transition gap-1">
+                                🗑 <span>Excluir</span>
+                            </button>
                         </form>
+                        @endif
+
+                        <!-- Gastos -->
+                        <a href="{{ route('veiculo.gastos.index', $veiculo->veiculo_id) }}"
+                            class="flex items-center text-green-600 hover:text-green-800 transition gap-1">
+                            💰 <span>Gastos</span>
+                        </a>
                     </div>
                     @endif
                 </div>
@@ -108,6 +131,5 @@
     <div class="mt-6 flex justify-center">
         {{ $veiculos->onEachSide(1)->links() }}
     </div>
-
 </div>
 @endsection

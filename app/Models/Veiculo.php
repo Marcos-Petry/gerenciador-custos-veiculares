@@ -50,4 +50,10 @@ class Veiculo extends Model
         return $this->belongsToMany(User::class, 'responsavelveiculo', 'veiculo_id', 'usucodigo')
             ->withTimestamps();
     }
+
+    public function gastos()
+{
+    return $this->hasMany(Gasto::class, 'veiculo_id');
+}
+
 }

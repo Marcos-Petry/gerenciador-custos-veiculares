@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\VeiculoController;
 use App\Http\Controllers\FrotaController;
+use App\Http\Controllers\GastoController;
 use App\Http\Controllers\NotificacaoController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('frota', FrotaController::class)
         ->parameters(['frota' => 'frota']);
 
+    // Listar apenas veículos de uma frota específica
+    Route::get('frota/{frota}/veiculos', [App\Http\Controllers\VeiculoController::class, 'indexPorFrota'])
+        ->name('frota.veiculos.index');
+
+
     Route::post('/notificacao/enviar', [NotificacaoController::class, 'enviar'])->name('notificacao.enviar');
     Route::post('/notificacao/aceitar/{id}', [NotificacaoController::class, 'aceitar'])->name('notificacao.aceitar');
     Route::post('/notificacao/recusar/{id}', [NotificacaoController::class, 'recusar'])->name('notificacao.recusar');
@@ -38,6 +44,17 @@ Route::middleware('auth')->group(function () {
 
     // buscar por email no campo de add responsável
     Route::get('/buscar-usuario', [UserController::class, 'buscar'])->name('usuario.buscar');
+
+    // CRUD padrão de gastos (geral)
+    Route::resource('gastos', GastoController::class);
+
+    Route::get('frota/{frota}/gasto', [GastoController::class, 'indexPorFrota'])->name('frota.gasto.index');
+
+    // Gastos vinculados a um veículo específico
+    Route::prefix('veiculo/{veiculo}')->group(function () {
+        Route::get('gastos', [GastoController::class, 'indexPorVeiculo'])->name('veiculo.gastos.index');
+        Route::get('gastos/create', [GastoController::class, 'createPorVeiculo'])->name('veiculo.gastos.create');
+    });
 });
 
 require __DIR__ . '/auth.php';

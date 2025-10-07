@@ -24,8 +24,26 @@
         </p>
     </div>
 
-    {{-- Veículos --}}
-    <h2 class="text-xl font-semibold mt-8 mb-2">🚗 Veículos dessa frota</h2>
+    {{-- 🚗 Título e botões lado a lado --}}
+    <div class="flex items-center justify-between mt-8 mb-2 flex-wrap gap-2">
+        <h2 class="text-xl font-semibold">🚗 Veículos dessa frota</h2>
+        <div class="flex gap-2">
+            {{-- Ver veículos --}}
+            <a href="{{ route('frota.veiculos.index', $frota->frota_id) }}"
+                class="px-5 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
+                🚘 Ver Veículos
+            </a>
+
+            {{-- Ver gastos --}}
+            <a href="{{ route('frota.gasto.index', $frota->frota_id) }}"
+                class="px-5 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition">
+                💰 Ver Gastos
+            </a>
+        </div>
+    </div>
+
+
+    {{-- Lista de veículos --}}
     <ul class="list-disc ml-6">
         @forelse($frota->veiculos as $veiculo)
         <li>{{ $veiculo->modelo }} ({{ $veiculo->placa }})</li>

@@ -6,7 +6,8 @@
 
     {{-- Foto --}}
     @if($veiculo->foto)
-    <img src="{{ asset('storage/' . $veiculo->foto) }}" alt="Foto do veículo"
+    <img src="{{ asset('storage/' . $veiculo->foto) }}"
+        alt="Foto do veículo"
         class="w-full h-60 object-cover rounded-lg mb-6">
     @endif
 
@@ -87,10 +88,17 @@
     </ul>
 
     {{-- Voltar --}}
+    @php
+    $fromFrota = request('from_frota');
+    $backUrl = $fromFrota
+    ? route('frota.veiculos.index', $fromFrota)
+    : route('veiculo.index');
+    $backLabel = $fromFrota ? '← Voltar à Veículos' : '← Voltar para Veículos';
+    @endphp
+
     <div class="flex justify-start mt-8">
-        <a href="{{ route('veiculo.index') }}"
-            class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">
-            ← Voltar
+        <a href="{{ $backUrl }}" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+            {{ $backLabel }}
         </a>
     </div>
 </div>

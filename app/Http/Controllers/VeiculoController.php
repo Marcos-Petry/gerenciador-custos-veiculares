@@ -13,14 +13,26 @@ class VeiculoController extends Controller
 {
     public function index(Request $request)
     {
+        $user = Auth::user();
+
         $veiculos = Veiculo::with('frota')
-            ->where('usuario_dono_id', Auth::id())
+            ->where(function ($query) use ($user) {
+                $query->where('usuario_dono_id', $user->id)
+                    ->orWhereHas('responsavel', fn($q) => $q->where('usucodigo', $user->id))
+                    ->orWhereHas('frota.responsavel', fn($q) => $q->where('usucodigo', $user->id));
+            })
+            ->orderBy('modelo')
             ->paginate(6);
 
         $origemCampoExterno = $request->boolean('origemCampoExterno', false);
 
-        return view('veiculo.index', compact('veiculos', 'origemCampoExterno'));
+        // 🔹 Identifica se o usuário é somente responsável (sem ser dono de nenhum veículo)
+        $modoSomenteVisualizacao = !$veiculos->contains('usuario_dono_id', $user->id);
+
+        return view('veiculo.index', compact('veiculos', 'origemCampoExterno', 'modoSomenteVisualizacao'));
     }
+
+
 
     public function create(Request $request)
     {
@@ -59,7 +71,7 @@ class VeiculoController extends Controller
             ->with('success', 'Veículo cadastrado com sucesso!');
     }
 
-    public function show(Veiculo $veiculo)
+    public function show(Veiculo $veiculo, Request $request)
     {
         // Dono/frota e responsáveis já ativos (belongsToMany)
         $veiculo->load(['frota', 'responsavel']);
@@ -80,8 +92,12 @@ class VeiculoController extends Controller
             ->orderByDesc('data_resposta')
             ->get();
 
-        return view('veiculo.show', compact('veiculo', 'convitesPendentes', 'convitesRespondidos'));
+        // Novo: checa se veio da frota
+        $fromFrota = $request->query('from_frota'); // Ex: ?from_frota=3
+
+        return view('veiculo.show', compact('veiculo', 'convitesPendentes', 'convitesRespondidos', 'fromFrota'));
     }
+
 
     public function edit(Request $request, Veiculo $veiculo)
     {
@@ -190,5 +206,32 @@ class VeiculoController extends Controller
 
         // Cria convites apenas para os novos filtrados
         $this->criarNotificacoesResponsaveis($veiculo, $novos);
+    }
+
+    public function indexPorFrota($frota_id)
+    {
+        $user = Auth::user();
+
+        // Carrega a frota com seus veículos e responsáveis
+        $frota = \App\Models\Frota::with(['veiculos', 'responsavel'])->findOrFail($frota_id);
+
+        // Verifica se o usuário é dono da frota OU está listado na tabela pivot responsavelfrota
+        $usuarioEhDono = $frota->usuario_dono_id === $user->id;
+        $usuarioEhResponsavel = $frota->responsavel->contains('id', $user->id);
+
+        if (!($usuarioEhDono || $usuarioEhResponsavel)) {
+            abort(403, 'Você não tem permissão para acessar esta frota.');
+        }
+
+        // Determina modo de exibição (somente visualização para responsáveis)
+        $modoSomenteVisualizacao = !$usuarioEhDono;
+
+        // 🔹 Carrega todos os veículos vinculados a esta frota
+        // Mesmo que o usuário logado não seja dono dos veículos, poderá visualizá-los
+        $veiculos = \App\Models\Veiculo::where('frota_id', $frota_id)
+            ->orderBy('modelo')
+            ->paginate(9);
+
+        return view('veiculo.index_por_frota', compact('frota', 'veiculos', 'modoSomenteVisualizacao'));
     }
 }

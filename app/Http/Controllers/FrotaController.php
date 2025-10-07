@@ -13,14 +13,28 @@ class FrotaController extends Controller
 {
     public function index(Request $request)
     {
-        $frotas = Frota::with('veiculos')
-            ->where('usuario_dono_id', Auth::id())
-            ->paginate(6);
+        $user = Auth::user();
 
+        // 🔹 Consulta: frotas em que o usuário é dono ou responsável
+        $frotasQuery = Frota::with('veiculos', 'responsavel')
+            ->where('usuario_dono_id', $user->id)
+            ->orWhereHas('responsavel', fn($q) => $q->where('usucodigo', $user->id));
+
+        // 🔹 Paginação (mantém o ->paginate() pra usar onEachSide() na view)
+        $frotas = $frotasQuery->paginate(6);
+
+        // 🔹 Adiciona uma flag "ehDono" pra controlar permissões na view
+        $frotas->getCollection()->transform(function ($frota) use ($user) {
+            $frota->ehDono = $frota->usuario_dono_id === $user->id;
+            return $frota;
+        });
+
+        // 🔹 Flag que indica se veio de seleção externa
         $origemCampoExterno = $request->boolean('origemCampoExterno', false);
 
         return view('frota.index', compact('frotas', 'origemCampoExterno'));
     }
+
 
     public function create(Request $request)
     {

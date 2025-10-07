@@ -11,41 +11,42 @@
         </div>
 
         @if($origemCampoExterno)
-            <!-- Botão confirmar aparece só no modo seleção -->
-            <button type="submit" form="form-selecao-frotas"
-                class="px-6 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition">
-                ✅ Confirmar Seleção
-            </button>
+        <!-- Botão confirmar aparece só no modo seleção -->
+        <button type="submit" form="form-selecao-frotas"
+            class="px-6 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition">
+            ✅ Confirmar Seleção
+        </button>
         @else
-            <a href="{{ route('frota.create') }}"
-                class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition">
-                ➕ Nova Frota
-            </a>
+        <a href="{{ route('frota.create') }}"
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition">
+            ➕ Nova Frota
+        </a>
         @endif
     </div>
 
     <!-- Se for seleção, abre o form -->
     @if($origemCampoExterno)
-    <form id="form-selecao-frotas" 
-          method="GET" 
-          action="{{ request()->has('veiculo_id') ? route('veiculo.edit', request('veiculo_id')) : route('veiculo.create') }}">
+    <form id="form-selecao-frotas"
+        method="GET"
+        action="{{ request()->has('veiculo_id') ? route('veiculo.edit', request('veiculo_id')) : route('veiculo.create') }}">
 
         <!-- Mantém os dados que vieram da tela de create/edit -->
         @foreach(request()->except(['_token','origemCampoExterno']) as $key => $value)
-            @if(is_array($value))
-                @foreach($value as $v)
-                    <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
-                @endforeach
-            @else
-                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-            @endif
+        @if(is_array($value))
+        @foreach($value as $v)
+        <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
         @endforeach
-    @endif
+        @else
+        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+        @endif
+        @endforeach
+        @endif
 
         <!-- Grid de Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($frotas as $frota)
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden transform transition hover:shadow-2xl hover:-translate-y-2 hover:scale-105">
+
                 <!-- Foto -->
                 @if($frota->foto)
                 <div class="w-full h-40 bg-gray-100 flex items-center justify-center overflow-hidden">
@@ -74,24 +75,39 @@
                     </p>
 
                     @if($origemCampoExterno)
-                        <!-- Radio: só pode escolher 1 frota -->
-                        <div class="mt-4 flex items-center">
-                            <input type="radio" name="frota_id" value="{{ $frota->frota_id }}"
-                                class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
-                            <span class="ml-2 text-sm text-gray-600">Selecionar</span>
-                        </div>
+                    <!-- Radio: só pode escolher 1 frota -->
+                    <div class="mt-4 flex items-center">
+                        <input type="radio" name="frota_id" value="{{ $frota->frota_id }}"
+                            class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+                        <span class="ml-2 text-sm text-gray-600">Selecionar</span>
+                    </div>
                     @else
-                        <!-- Ações normais -->
-                        <div class="flex justify-between mt-4">
-                            <a href="{{ route('frota.show', $frota) }}" class="text-blue-600 hover:underline">👁 Ver</a>
-                            <a href="{{ route('frota.edit', $frota) }}" class="text-yellow-600 hover:underline">✏ Editar</a>
-                            <form action="{{ route('frota.destroy', $frota) }}" method="POST"
-                                onsubmit="return confirm('Excluir frota?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:underline">🗑 Excluir</button>
-                            </form>
-                        </div>
+                    <!-- Ações -->
+                    <div class="flex justify-center gap-5 mt-5 text-sm font-medium">
+                        <!-- Ver sempre disponível -->
+                        <a href="{{ route('frota.show', $frota) }}"
+                            class="text-blue-600 hover:underline flex items-center gap-1">
+                            👁 Ver
+                        </a>
+
+                        <!-- Apenas o dono pode editar/excluir -->
+                        @if(isset($frota->ehDono) && $frota->ehDono)
+                        <a href="{{ route('frota.edit', $frota) }}"
+                            class="text-yellow-600 hover:underline flex items-center gap-1">
+                            ✏ Editar
+                        </a>
+
+                        <form action="{{ route('frota.destroy', $frota) }}" method="POST"
+                            onsubmit="return confirm('Excluir frota?')" class="inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                class="text-red-600 hover:underline flex items-center gap-1">
+                                🗑 Excluir
+                            </button>
+                        </form>
+                        @endif
+                    </div>
                     @endif
                 </div>
             </div>

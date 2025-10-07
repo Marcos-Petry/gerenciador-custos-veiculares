@@ -40,4 +40,17 @@ class Frota extends Model
         return $this->belongsToMany(User::class, 'responsavelfrota', 'frota_id', 'usucodigo')
             ->withTimestamps();
     }
+
+    // Gera automaticamente todos os gastos da frota (via veículos)
+    public function gastos()
+    {
+        return $this->hasManyThrough(
+            Gasto::class,
+            Veiculo::class,
+            'frota_id',      // chave estrangeira em Veiculo
+            'veiculo_id',    // chave estrangeira em Gasto
+            'frota_id',      // chave local em Frota
+            'veiculo_id'     // chave local em Veiculo
+        );
+    }
 }
