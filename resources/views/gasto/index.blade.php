@@ -40,7 +40,8 @@
             </select>
         </div>
 
-        <div class="flex-1">
+        <!-- Valor -->
+        <div class="flex-1 max-w-md">
             <label class="block text-white text-sm font-semibold mb-1">Valor</label>
             <input type="text" name="valor" value="{{ request('valor') }}" placeholder="Digite o valor"
                 class="rounded-lg border-gray-300 px-3 py-1.5 w-full">
@@ -84,6 +85,7 @@
                     <th class="px-6 py-3 text-left font-semibold">Descrição</th>
                     <th class="px-6 py-3 text-left font-semibold">Valor</th>
                     <th class="px-6 py-3 text-left font-semibold">Data</th>
+                    <th class="px-4 py-3 text-center font-semibold w-16">Anexos</th>
                 </tr>
             </thead>
             <tbody>
@@ -95,14 +97,35 @@
                     <td class="px-6 py-3">{{ $gasto->descricao ?? '—' }}</td>
                     <td class="px-6 py-3">R$ {{ number_format($gasto->valor, 2, ',', '.') }}</td>
                     <td class="px-6 py-3">{{ \Carbon\Carbon::parse($gasto->data_gasto)->format('d/m/Y') }}</td>
+
+                    {{-- Indicativo de anexo --}}
+                    <td class="px-4 py-3 text-center">
+                        @if($gasto->anexos->count() > 0)
+                        📎
+                        @else
+
+                        @endif
+                    </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="text-center py-4 text-gray-500">Nenhum gasto encontrado.</td>
+                    <td colspan="6" class="text-center py-4 text-gray-500">Nenhum gasto encontrado.</td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
+    </div>
+</div>
+
+<div class="mt-6 flex flex-col sm:flex-row justify-between items-center text-sm text-gray-700 gap-2">
+    <!-- Total de registros -->
+    <div class="bg-white/40 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/30 shadow-sm">
+        Exibindo <strong>{{ $gastos->count() }}</strong> de <strong>{{ $gastos->total() }}</strong> registros
+    </div>
+
+    <!-- Links de paginação -->
+    <div>
+        {{ $gastos->onEachSide(1)->links() }}
     </div>
 </div>
 

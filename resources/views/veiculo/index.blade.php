@@ -3,33 +3,64 @@
 @section('content')
 <div class="py-8 px-6">
 
-    <!-- Filtros e Ações -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-        <div class="flex gap-2">
-            <input type="text" placeholder="🔎 Buscar por modelo ou placa"
-                class="px-4 py-2 border rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <select class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">Filtrar por Frota</option>
-                <option value="1">Frota A</option>
-                <option value="2">Frota B</option>
+    <h1 class="text-2xl font-bold text-white mb-6">🚗 Meus Veículos</h1>
+
+    <!-- 🔹 Filtros -->
+    <form method="GET" class="flex flex-wrap items-end gap-3 mb-3">
+        <div>
+            <label class="block text-white text-sm font-semibold mb-1">Campo</label>
+            <select name="campo" class="rounded-lg border-gray-300 px-3 py-1.5 w-44">
+                <option value="modelo" {{ request('campo') == 'modelo' ? 'selected' : '' }}>Modelo</option>
+                <option value="placa" {{ request('campo') == 'placa' ? 'selected' : '' }}>Placa</option>
+                <option value="ano" {{ request('campo') == 'ano' ? 'selected' : '' }}>Ano</option>
             </select>
         </div>
 
+        <div>
+            <label class="block text-white text-sm font-semibold mb-1">Operador</label>
+            <select name="operador" class="rounded-lg border-gray-300 px-3 py-1.5 w-48">
+                <option value="=" {{ request('operador') == '=' ? 'selected' : '' }}>Igual a (=)</option>
+                <option value=">" {{ request('operador') == '>' ? 'selected' : '' }}>Maior que (>)</option>
+                <option value="<" {{ request('operador') == '<' ? 'selected' : '' }}>Menor que (<)< /option>
+                <option value="like" {{ request('operador') == 'like' ? 'selected' : '' }}>Contém</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-white text-sm font-semibold mb-1">Valor</label>
+            <input type="text" name="valor" value="{{ request('valor') }}" placeholder="Digite o valor"
+                class="rounded-lg border-gray-300 px-3 py-1.5 w-80">
+        </div>
+
+        <div class="flex items-end gap-2">
+            <button type="submit"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                Filtrar
+            </button>
+            <a href="{{ route('veiculo.index') }}"
+                class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition">
+                Limpar
+            </a>
+        </div>
+    </form>
+
+
+    <!-- 🔹 Ações -->
+    <div class="flex gap-2 mb-6">
         @if($origemCampoExterno)
-        <!-- Botão confirmar aparece só no modo seleção -->
         <button type="submit" form="form-selecao-veiculos"
-            class="px-6 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition">
+            class="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium">
             ✅ Confirmar Seleção
         </button>
         @else
         <a href="{{ route('veiculo.create') }}"
-            class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition">
+            class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
             ➕ Novo Veículo
         </a>
         @endif
     </div>
 
-    <!-- Se for seleção, abre o form -->
+    <!-- 🔹 Se for seleção, abre o form -->
     @if($origemCampoExterno)
     <form id="form-selecao-veiculos" method="GET" action="{{ route('frota.create') }}">
         @foreach(request()->except(['_token','origemCampoExterno']) as $key => $value)
@@ -43,7 +74,7 @@
         @endforeach
         @endif
 
-        <!-- Grid de Cards -->
+        <!-- 🔹 Grid de Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($veiculos as $veiculo)
             <div
@@ -127,9 +158,18 @@
 
     </form>
 
-    <!-- Paginação -->
-    <div class="mt-6 flex justify-center">
-        {{ $veiculos->onEachSide(1)->links() }}
+    <!-- Paginação-->
+    <div class="mt-6 flex flex-col sm:flex-row justify-between items-center text-sm text-gray-700 gap-2">
+
+        <!-- Total de registros -->
+        <div class="bg-white/40 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/30 shadow-sm">
+            Exibindo <strong>{{ $veiculos->count() }}</strong> de <strong>{{ $veiculos->total() }}</strong> registros
+        </div>
+
+        <!-- Links de paginação -->
+        <div>
+            {{ $veiculos->onEachSide(1)->links() }}
+        </div>
     </div>
 </div>
 @endsection
