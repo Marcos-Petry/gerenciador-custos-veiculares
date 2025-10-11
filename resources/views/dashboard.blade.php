@@ -30,11 +30,20 @@
             <p class="text-sm text-gray-600 mt-2">Registre e acompanhe todas as despesas.</p>
         </a>
 
-        <a href="#" class="bg-white rounded-2xl shadow-lg p-6 transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:scale-105 hover:bg-gray-200">
+        <a href="{{ route('publico.index') }}"
+            class="bg-white rounded-2xl shadow-lg p-6 transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:scale-105 hover:bg-gray-200">
             <div class="text-3xl mb-3">🔎</div>
             <h2 class="font-semibold text-lg">Buscar Veículos</h2>
             <p class="text-sm text-gray-600 mt-2">Consulte veículos públicos e compare gastos.</p>
         </a>
+
+        <a href="{{ route('publico.comparar') }}"
+            class="bg-white rounded-2xl shadow-lg p-6 transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:scale-105 hover:bg-gray-200">
+            <div class="text-3xl mb-3">⚖️</div>
+            <h2 class="font-semibold text-lg">Comparar Veículos</h2>
+            <p class="text-sm text-gray-600 mt-2">Compare gastos entre dois veículos públicos.</p>
+        </a>
+
 
         <a href="#" class="bg-white rounded-2xl shadow-lg p-6 transform transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:scale-105 hover:bg-gray-200">
             <div class="text-3xl mb-3">👥</div>

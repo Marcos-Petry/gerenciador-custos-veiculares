@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ComparacaoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\VeiculoController;
 use App\Http\Controllers\FrotaController;
@@ -55,6 +56,10 @@ Route::middleware('auth')->group(function () {
         Route::get('gastos', [GastoController::class, 'indexPorVeiculo'])->name('veiculo.gastos.index');
         Route::get('gastos/create', [GastoController::class, 'createPorVeiculo'])->name('veiculo.gastos.create');
     });
+
+    Route::get('/publico', [App\Http\Controllers\PublicoController::class, 'index'])->name('publico.index');
+
+    Route::get('/publico/comparar', [App\Http\Controllers\PublicoController::class, 'comparar'])->name('publico.comparar');
 });
 
 require __DIR__ . '/auth.php';
