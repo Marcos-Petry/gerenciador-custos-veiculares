@@ -60,6 +60,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/publico', [App\Http\Controllers\PublicoController::class, 'index'])->name('publico.index');
 
     Route::get('/publico/comparar', [App\Http\Controllers\PublicoController::class, 'comparar'])->name('publico.comparar');
+
+    Route::get('/frotas/{frota}/gastos/create', [GastoController::class, 'createPorFrota'])
+        ->name('frota.gasto.create');
+
+    // Linha do tempo de gastos por veículo
+    Route::get('/veiculos/{veiculo}/gastos/linha-tempo', [GastoController::class, 'linhaTempoVeiculo'])
+        ->name('veiculo.gastos.linha-tempo');
+
+    // Linha do tempo de gastos por frota
+    Route::get('/frotas/{frota}/gastos/linha-tempo', [GastoController::class, 'linhaTempoFrota'])
+        ->name('frota.gastos.linha-tempo');
 });
 
 require __DIR__ . '/auth.php';

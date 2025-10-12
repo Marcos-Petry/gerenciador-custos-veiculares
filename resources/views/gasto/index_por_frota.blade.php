@@ -71,6 +71,22 @@
         </div>
     </form>
 
+    <!-- 🔹 Ações -->
+    <div class="flex gap-2 mb-4">
+        <a href="{{ route('frota.gasto.create', $frota->frota_id) }}"
+            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+            ➕ Inserir Gasto
+        </a>
+
+        <a href="{{ route('frota.gastos.linha-tempo', $frota->frota_id) }}"
+            class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+            🕒 Linha do Tempo
+        </a>
+
+        {{-- Futuramente dá pra ativar edição, visualização, etc. --}}
+    </div>
+
+
     <!-- 🔹 Tabela de Gastos -->
     <div class="overflow-x-auto bg-white rounded-xl shadow">
         <table class="w-full border-collapse">

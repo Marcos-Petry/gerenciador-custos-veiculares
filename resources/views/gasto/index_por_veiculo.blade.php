@@ -67,6 +67,12 @@
         <button id="btnExcluir" class="px-4 py-2 bg-red-600 text-white rounded-lg disabled:opacity-50" disabled>
             🗑️ Excluir
         </button>
+
+        <a href="{{ route('veiculo.gastos.linha-tempo', $veiculo->veiculo_id) }}"
+            class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+            🕒 Linha do Tempo
+        </a>
+
     </div>
 
     <!-- 🔹 Tabela -->

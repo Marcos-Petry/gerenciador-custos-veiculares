@@ -218,4 +218,35 @@ class GastoController extends Controller
 
         return view('gasto.index_por_frota', compact('frota', 'gastos'));
     }
+
+    public function createPorFrota($frotaId)
+    {
+        $frota = \App\Models\Frota::with('veiculos')->findOrFail($frotaId);
+        $veiculos = $frota->veiculos; // apenas veículos dessa frota
+
+        return view('gasto.create', compact('veiculos', 'frota'));
+    }
+
+    public function linhaTempoVeiculo($veiculoId)
+    {
+        $veiculo = \App\Models\Veiculo::findOrFail($veiculoId);
+
+        // Pega os gastos do veículo, ordenados por data decrescente
+        $gastos = \App\Models\Gasto::where('veiculo_id', $veiculoId)
+            ->orderBy('data_gasto', 'desc')
+            ->get();
+
+        return view('gasto.linha-tempo', compact('veiculo', 'gastos'));
+    }
+
+    public function linhaTempoFrota($frotaId)
+    {
+        $frota = \App\Models\Frota::with('veiculos.gastos')->findOrFail($frotaId);
+
+        // Junta todos os gastos da frota (de todos os veículos)
+        $gastos = $frota->veiculos->flatMap->gastos
+            ->sortByDesc('data_gasto');
+
+        return view('gasto.linha-tempo', compact('frota', 'gastos'));
+    }
 }
