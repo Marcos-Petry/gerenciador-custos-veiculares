@@ -48,8 +48,6 @@
       <nav class="mt-6 flex flex-wrap gap-4 text-sm text-gray-600">
         <a href="#como-funciona" class="hover:text-gray-900">Como funciona</a>
         <span class="text-gray-400">•</span>
-        <a href="#planos" class="hover:text-gray-900">Planos e preços</a>
-        <span class="text-gray-400">•</span>
         <a href="#sobre-nos" class="hover:text-gray-900">Sobre nós</a>
       </nav>
     </div>
@@ -144,125 +142,6 @@
           <p class="mt-3 text-gray-700 leading-relaxed text-sm">{{ $item['desc'] }}</p>
         </div>
       </article>
-      @endforeach
-    </div>
-  </div>
-</section>
-
-{{-- PLANOS E PREÇOS --}}
-<section id="planos" class="bg-gray-50 border-y">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-    <div class="text-center">
-      <h2 class="text-2xl font-bold">Planos e preços</h2>
-      <p class="mt-2 text-gray-600">Atualmente o plano gratuito inclui todos os recursos essenciais para gestão de frotas.</p>
-    </div>
-
-    @php
-    $plans = [
-      [
-        'name' => 'Gratuito',
-        'subtitle' => 'Plano completo para testar e usar o sistema.',
-        'price' => 'R$ 0', 'suffix' => '/mês',
-        'bullets' => [
-          'Cadastro de <b>veículos</b> e <b>frotas</b>',
-          'Anexos em gastos (PDF / imagem)',
-          'Comparativo de desempenho entre veículos',
-          'Linha do tempo de gastos detalhada',
-          'Gestão colaborativa com responsáveis',
-        ],
-        'cta' => ['text' => 'Começar grátis', 'href' => route('register'), 'primary' => true],
-        'highlight' => false,
-        'badge' => 'Disponível',
-        'is_active' => true,
-      ],
-      [
-        'name' => 'Pro',
-        'subtitle' => 'Para quem gerencia frota pequena/média.',
-        'price' => 'R$ 29', 'suffix' => '/mês',
-        'bullets' => [
-          'Até <b>50 veículos</b> e <b>10 frotas</b>',
-          'Cadastro de <b>veículos</b> e <b>frotas</b>',
-          'Anexos em gastos (PDF / imagem)',
-          'Comparativo de desempenho entre veículos',
-          'Linha do tempo de gastos detalhada',
-          'Gestão colaborativa com responsáveis',
-          'Suporte por e-mail em <b>48h</b>',
-        ],
-        'cta' => ['text' => 'Em breve', 'href' => '#', 'primary' => false],
-        'highlight' => false,
-        'badge' => null,
-        'is_active' => false,
-      ],
-      [
-        'name' => 'Empresarial',
-        'subtitle' => 'Para equipes e múltiplas unidades.',
-        'price' => 'Sob consulta', 'suffix' => null,
-        'bullets' => [
-          '<b>Veículos e frotas ilimitados</b>',
-          'SSO / LDAP (opcional) e auditoria',
-          'Backups dedicados',
-          'Suporte prioritário / SLA',
-          'Anexos em gastos (PDF / imagem)',
-          'Comparativo de desempenho entre veículos',
-          'Linha do tempo de gastos detalhada',
-          'Gestão colaborativa com responsáveis',
-        ],
-        'cta' => ['text' => 'Em breve', 'href' => '#', 'primary' => false],
-        'highlight' => false,
-        'badge' => null,
-        'is_active' => false,
-      ],
-    ];
-    @endphp
-
-    <div class="mt-10 grid md:grid-cols-3 gap-6">
-      @foreach ($plans as $p)
-        @php
-          $cardBase = 'rounded-2xl border bg-white p-6 relative flex flex-col transition-all duration-200 cursor-default';
-          $cardClass = $p['highlight']
-              ? $cardBase.' ring-2 ring-indigo-600 hover:ring-indigo-700'
-              : $cardBase.' hover:ring-2 hover:ring-indigo-300';
-        @endphp
-
-        <div class="{{ $cardClass }}">
-          @if (!empty($p['badge']))
-            <span class="absolute -top-3 right-6 rounded-full bg-indigo-600 text-white text-xs px-3 py-1">{{ $p['badge'] }}</span>
-          @endif
-
-          <h3 class="text-lg font-semibold {{ $p['is_active'] ? 'text-gray-900' : 'text-gray-400' }}">{{ $p['name'] }}</h3>
-          <p class="mt-1 text-sm {{ $p['is_active'] ? 'text-gray-600' : 'text-gray-400' }}">{{ $p['subtitle'] }}</p>
-
-          <div class="mt-4">
-            <span class="text-3xl font-extrabold {{ $p['is_active'] ? 'text-gray-900' : 'text-gray-400' }}">{!! $p['price'] !!}</span>
-            @if($p['suffix'])
-              <span class="{{ $p['is_active'] ? 'text-gray-500' : 'text-gray-400' }}">{{ $p['suffix'] }}</span>
-            @endif
-          </div>
-
-          <ul class="mt-6 space-y-2 text-sm {{ $p['is_active'] ? 'text-gray-700' : 'text-gray-400' }}">
-            @foreach ($p['bullets'] as $b)
-              <li class="flex items-start gap-2">
-                <span class="mt-2 h-1.5 w-1.5 rounded-full {{ $p['is_active'] ? 'bg-indigo-600' : 'bg-gray-300' }}"></span>
-                <span>{!! $b !!}</span>
-              </li>
-            @endforeach
-          </ul>
-
-          {{-- Botão fixo no final --}}
-          <div class="mt-auto pt-6">
-            <a href="{{ $p['is_active'] ? $p['cta']['href'] : '#' }}"
-              aria-label="Selecionar plano {{ $p['name'] }}"
-              class="w-full inline-flex justify-center px-5 py-3 rounded-md font-medium text-center
-                    {{ $p['is_active']
-                        ? ($p['cta']['primary']
-                            ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                            : 'border hover:bg-gray-100')
-                        : 'border text-gray-400 bg-gray-100 cursor-not-allowed' }}"
-              {{ $p['is_active'] ? '' : 'disabled' }}>
-              {{ $p['cta']['text'] }}
-            </a>
-          </div>
-        </div>
       @endforeach
     </div>
   </div>
