@@ -50,7 +50,7 @@
         <span class="text-gray-400">•</span>
         <a href="#planos" class="hover:text-gray-900">Planos e preços</a>
         <span class="text-gray-400">•</span>
-        <a href="#beneficios" class="hover:text-gray-900">Benefícios</a>
+        <a href="#sobre-nos" class="hover:text-gray-900">Sobre nós</a>
       </nav>
     </div>
 
@@ -90,8 +90,6 @@
         </div>
       </dl>
     </div>
-
-
   </div>
 </section>
 
@@ -102,30 +100,30 @@
 
     @php
     $how = [
-    [
-    'title' => 'Gestão de veículos e frotas',
-    'desc' => 'Cadastre veículos e frotas, adicione fotos e organize-os por categoria. Acompanhe todas as informações de forma centralizada e acessível.',
-    'img' => asset('img/como-veiculos-frotas.jpg'),
-    'alt' => 'Painel de gestão de veículos e frotas',
-    ],
-    [
-    'title' => 'Linha do tempo de gastos',
-    'desc' => 'Visualize os gastos de cada veículo em uma linha do tempo cronológica, facilitando a análise financeira e a identificação de períodos críticos.',
-    'img' => asset('img/como-linha-tempo.jpg'),
-    'alt' => 'Linha do tempo de despesas de veículos',
-    ],
-    [
-    'title' => 'Comparativo de desempenho',
-    'desc' => 'Compare veículos com base no custo por quilômetro (R$/km) e consumo médio (km/L), identificando aqueles com melhor desempenho e economia.',
-    'img' => asset('img/como-comparativo.jpg'),
-    'alt' => 'Gráfico comparativo de desempenho entre veículos',
-    ],
-    [
-    'title' => 'Gestão colaborativa',
-    'desc' => 'Convide responsáveis e compartilhe a administração das frotas, permitindo o trabalho conjunto de forma simples e segura.',
-    'img' => asset('img/como-colaborativo.jpg'),
-    'alt' => 'Colaboração entre responsáveis',
-    ],
+      [
+        'title' => 'Gestão de veículos e frotas',
+        'desc' => 'Cadastre veículos e frotas, adicione fotos e organize-os por categoria. Acompanhe todas as informações de forma centralizada e acessível.',
+        'img' => asset('images/veiculo-frota-home.png'),
+        'alt' => 'Painel de gestão de veículos e frotas',
+      ],
+      [
+        'title' => 'Linha do tempo de gastos',
+        'desc' => 'Visualize os gastos de cada veículo em uma linha do tempo cronológica, facilitando a análise financeira e a identificação de períodos críticos.',
+        'img' => asset('images/linha-tempo-home.png'),
+        'alt' => 'Linha do tempo de despesas de veículos',
+      ],
+      [
+        'title' => 'Comparativo de desempenho',
+        'desc' => 'Compare veículos com base no custo por quilômetro (R$/km) e consumo médio (km/L), identificando aqueles com melhor desempenho e economia.',
+        'img' => asset('images/coomparativo-home.png'),
+        'alt' => 'Gráfico comparativo de desempenho entre veículos',
+      ],
+      [
+        'title' => 'Gestão colaborativa',
+        'desc' => 'Convide responsáveis e compartilhe a administração das frotas, permitindo o trabalho conjunto de forma simples e segura.',
+        'img' => asset('images/cooperacao-home.png'),
+        'alt' => 'Colaboração entre responsáveis',
+      ],
     ];
     @endphp
 
@@ -151,114 +149,128 @@
   </div>
 </section>
 
-
-{{-- PLANOS E PREÇOS (com divisão em cima e embaixo) --}}
+{{-- PLANOS E PREÇOS --}}
 <section id="planos" class="bg-gray-50 border-y">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
     <div class="text-center">
       <h2 class="text-2xl font-bold">Planos e preços</h2>
-      <p class="mt-2 text-gray-600">Escolha o plano que faz sentido para agora. Você pode mudar a qualquer momento.</p>
+      <p class="mt-2 text-gray-600">Atualmente o plano gratuito inclui todos os recursos essenciais para gestão de frotas.</p>
     </div>
 
     @php
     $plans = [
-    [
-    'name' => 'Gratuito',
-    'subtitle' => 'Para começar e testar o sistema.',
-    'price' => 'R$ 0', 'suffix' => '/mês',
-    'bullets' => [
-    'Até <b>3 veículos</b> e <b>1 frota</b>',
-    '<b>1 responsável</b> convidado',
-    'Gastos básicos (sem anexos)',
-    'Linha do tempo por veículo',
-    'Suporte por e-mail em <b>72h</b>',
-    ],
-    'cta' => ['text' => 'Começar grátis', 'href' => route('register'), 'primary' => false],
-    'highlight' => false,
-    'badge' => null,
-    ],
-    [
-    'name' => 'Pro',
-    'subtitle' => 'Para quem gerencia frota pequena/média.',
-    'price' => 'R$ 29', 'suffix' => '/mês',
-    'bullets' => [
-    'Até <b>50 veículos</b> e <b>10 frotas</b>',
-    '<b>Responsáveis ilimitados</b>',
-    'Anexos em gastos (PDF/imagem)',
-    'Exportação CSV/PDF e <b>comparativos</b>',
-    'Suporte por e-mail em <b>48h</b>',
-    ],
-    'cta' => ['text' => 'Assinar Pro', 'href' => route('register'), 'primary' => true],
-    'highlight' => true,
-    'badge' => 'Mais popular',
-    ],
-    [
-    'name' => 'Empresarial',
-    'subtitle' => 'Para equipes e múltiplas unidades.',
-    'price' => 'Sob consulta', 'suffix' => null,
-    'bullets' => [
-    '<b>Veículos, frotas e usuários ilimitados</b>',
-    'SSO/LDAP (opcional) e auditoria',
-    'Backups dedicados',
-    'epa',
-    'Suporte prioritário / SLA',
-    ],
-    'cta' => ['text' => 'Falar com vendas', 'href' => 'mailto:contato@empresa.com?subject=Plano%20Empresarial%20-%20Gastos%20Veiculares', 'primary' => false],
-    'highlight' => false,
-    'badge' => null,
-    ],
+      [
+        'name' => 'Gratuito',
+        'subtitle' => 'Plano completo para testar e usar o sistema.',
+        'price' => 'R$ 0', 'suffix' => '/mês',
+        'bullets' => [
+          'Cadastro de <b>veículos</b> e <b>frotas</b>',
+          'Anexos em gastos (PDF / imagem)',
+          'Comparativo de desempenho entre veículos',
+          'Linha do tempo de gastos detalhada',
+          'Gestão colaborativa com responsáveis',
+        ],
+        'cta' => ['text' => 'Começar grátis', 'href' => route('register'), 'primary' => true],
+        'highlight' => false,
+        'badge' => 'Disponível',
+        'is_active' => true,
+      ],
+      [
+        'name' => 'Pro',
+        'subtitle' => 'Para quem gerencia frota pequena/média.',
+        'price' => 'R$ 29', 'suffix' => '/mês',
+        'bullets' => [
+          'Até <b>50 veículos</b> e <b>10 frotas</b>',
+          'Cadastro de <b>veículos</b> e <b>frotas</b>',
+          'Anexos em gastos (PDF / imagem)',
+          'Comparativo de desempenho entre veículos',
+          'Linha do tempo de gastos detalhada',
+          'Gestão colaborativa com responsáveis',
+          'Suporte por e-mail em <b>48h</b>',
+        ],
+        'cta' => ['text' => 'Em breve', 'href' => '#', 'primary' => false],
+        'highlight' => false,
+        'badge' => null,
+        'is_active' => false,
+      ],
+      [
+        'name' => 'Empresarial',
+        'subtitle' => 'Para equipes e múltiplas unidades.',
+        'price' => 'Sob consulta', 'suffix' => null,
+        'bullets' => [
+          '<b>Veículos e frotas ilimitados</b>',
+          'SSO / LDAP (opcional) e auditoria',
+          'Backups dedicados',
+          'Suporte prioritário / SLA',
+          'Anexos em gastos (PDF / imagem)',
+          'Comparativo de desempenho entre veículos',
+          'Linha do tempo de gastos detalhada',
+          'Gestão colaborativa com responsáveis',
+        ],
+        'cta' => ['text' => 'Em breve', 'href' => '#', 'primary' => false],
+        'highlight' => false,
+        'badge' => null,
+        'is_active' => false,
+      ],
     ];
     @endphp
 
     <div class="mt-10 grid md:grid-cols-3 gap-6">
       @foreach ($plans as $p)
-      @php
-      $cardBase = 'rounded-2xl border bg-white p-6 relative flex flex-col transition-all duration-200 cursor-default hover:shadow-lg hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-indigo-400';
-      $cardClass = $p['highlight']
-      ? $cardBase.' ring-2 ring-indigo-600 hover:ring-indigo-700'
-      : $cardBase.' hover:ring-2 hover:ring-indigo-300';
-      @endphp
+        @php
+          $cardBase = 'rounded-2xl border bg-white p-6 relative flex flex-col transition-all duration-200 cursor-default';
+          $cardClass = $p['highlight']
+              ? $cardBase.' ring-2 ring-indigo-600 hover:ring-indigo-700'
+              : $cardBase.' hover:ring-2 hover:ring-indigo-300';
+        @endphp
 
-      <div class="{{ $cardClass }}">
-        @if (!empty($p['badge']))
-        <span class="absolute -top-3 right-6 rounded-full bg-indigo-600 text-white text-xs px-3 py-1">{{ $p['badge'] }}</span>
-        @endif
+        <div class="{{ $cardClass }}">
+          @if (!empty($p['badge']))
+            <span class="absolute -top-3 right-6 rounded-full bg-indigo-600 text-white text-xs px-3 py-1">{{ $p['badge'] }}</span>
+          @endif
 
-        <h3 class="text-lg font-semibold">{{ $p['name'] }}</h3>
-        <p class="mt-1 text-sm text-gray-600">{{ $p['subtitle'] }}</p>
+          <h3 class="text-lg font-semibold {{ $p['is_active'] ? 'text-gray-900' : 'text-gray-400' }}">{{ $p['name'] }}</h3>
+          <p class="mt-1 text-sm {{ $p['is_active'] ? 'text-gray-600' : 'text-gray-400' }}">{{ $p['subtitle'] }}</p>
 
-        <div class="mt-4">
-          <span class="text-3xl font-extrabold">{!! $p['price'] !!}</span>
-          @if($p['suffix']) <span class="text-gray-500">{{ $p['suffix'] }}</span> @endif
+          <div class="mt-4">
+            <span class="text-3xl font-extrabold {{ $p['is_active'] ? 'text-gray-900' : 'text-gray-400' }}">{!! $p['price'] !!}</span>
+            @if($p['suffix'])
+              <span class="{{ $p['is_active'] ? 'text-gray-500' : 'text-gray-400' }}">{{ $p['suffix'] }}</span>
+            @endif
+          </div>
+
+          <ul class="mt-6 space-y-2 text-sm {{ $p['is_active'] ? 'text-gray-700' : 'text-gray-400' }}">
+            @foreach ($p['bullets'] as $b)
+              <li class="flex items-start gap-2">
+                <span class="mt-2 h-1.5 w-1.5 rounded-full {{ $p['is_active'] ? 'bg-indigo-600' : 'bg-gray-300' }}"></span>
+                <span>{!! $b !!}</span>
+              </li>
+            @endforeach
+          </ul>
+
+          {{-- Botão fixo no final --}}
+          <div class="mt-auto pt-6">
+            <a href="{{ $p['is_active'] ? $p['cta']['href'] : '#' }}"
+              aria-label="Selecionar plano {{ $p['name'] }}"
+              class="w-full inline-flex justify-center px-5 py-3 rounded-md font-medium text-center
+                    {{ $p['is_active']
+                        ? ($p['cta']['primary']
+                            ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                            : 'border hover:bg-gray-100')
+                        : 'border text-gray-400 bg-gray-100 cursor-not-allowed' }}"
+              {{ $p['is_active'] ? '' : 'disabled' }}>
+              {{ $p['cta']['text'] }}
+            </a>
+          </div>
         </div>
-
-        <ul class="mt-6 space-y-2 text-sm text-gray-700">
-          @foreach ($p['bullets'] as $b)
-          <li class="flex items-start gap-2">
-            <span class="mt-2 h-1.5 w-1.5 rounded-full bg-indigo-600"></span>
-            <span>{!! $b !!}</span>
-          </li>
-          @endforeach
-        </ul>
-
-        <a href="{{ $p['cta']['href'] }}"
-          aria-label="Selecionar plano {{ $p['name'] }}"
-          class="mt-6 inline-flex justify-center px-5 py-3 rounded-md font-medium
-                      {{ $p['cta']['primary']
-                          ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                          : 'border hover:bg-gray-100' }}">
-          {{ $p['cta']['text'] }}
-        </a>
-      </div>
       @endforeach
     </div>
-
   </div>
 </section>
 
-<section class="bg-white py-16">
+{{-- SOBRE NÓS --}}
+<section id="sobre-nos" class="bg-white py-16">
   <div class="max-w-6xl mx-auto px-6 lg:px-8">
-    <!-- Texto introdutório -->
     <div class="text-center mb-8">
       <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
         Sobre Nós
@@ -270,10 +282,8 @@
       </p>
     </div>
 
-    <!-- Card único com 3 colunas -->
     <div class="bg-white shadow-lg rounded-xl border border-gray-200 p-8">
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
-        <!-- Missão -->
         <div>
           <h3 class="text-lg font-semibold text-gray-900">Missão</h3>
           <p class="mt-2 text-gray-600">
@@ -282,7 +292,6 @@
           </p>
         </div>
 
-        <!-- Visão -->
         <div>
           <h3 class="text-lg font-semibold text-gray-900">Visão</h3>
           <p class="mt-2 text-gray-600">
@@ -291,7 +300,6 @@
           </p>
         </div>
 
-        <!-- Valores -->
         <div>
           <h3 class="text-lg font-semibold text-gray-900">Valores</h3>
           <p class="mt-2 text-gray-600">
