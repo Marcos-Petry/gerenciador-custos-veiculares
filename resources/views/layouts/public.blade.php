@@ -1,41 +1,45 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>@yield('title', 'Gestão de Gastos Veiculares')</title>
   @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
+
 <body class="min-h-screen flex flex-col bg-gray-50 text-gray-900">
 
   <!-- Header fixo -->
-<header 
-    x-data="{ scrolled: false }" 
+  <header
+    x-data="{ scrolled: false }"
     x-init="window.addEventListener('scroll', () => { scrolled = window.scrollY > 0 })"
     :class="scrolled 
         ? 'bg-white/80 backdrop-blur border-b text-gray-900' 
         : 'bg-blue-900 text-white'"
     class="sticky top-0 z-50 transition-all duration-300">
-    
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <a href="{{ route('landing') }}" class="font-semibold text-lg">GestoCar</a>
+      <a href="{{ route('landing') }}" class="flex items-center gap-4">
+        <img src="{{ asset('images/logo.png') }}" alt="Logo GestoCar" class="h-14 w-auto sm:h-16">
+        <span class="font-semibold text-lg">GestoCar</span>
+      </a>
+
       <nav class="flex items-center gap-3">
-        <a href="{{ route('login') }}" 
-           :class="scrolled 
+        <a href="{{ route('login') }}"
+          :class="scrolled 
                 ? 'hover:bg-gray-100 text-gray-900' 
-                : 'hover:bg-blue-800 text-white'" 
-           class="px-3 py-2 rounded-md text-sm font-medium">
+                : 'hover:bg-blue-800 text-white'"
+          class="px-3 py-2 rounded-md text-sm font-medium">
           Entrar
         </a>
-        <a href="{{ route('register') }}" 
-           class="px-3 py-2 rounded-md text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700">
+        <a href="{{ route('register') }}"
+          class="px-3 py-2 rounded-md text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700">
           Criar conta
         </a>
       </nav>
     </div>
-</header>
-
-
+  </header>
 
   <!-- Conteúdo -->
   <main class="flex-1">
@@ -54,4 +58,5 @@
     </div>
   </footer>
 </body>
+
 </html>

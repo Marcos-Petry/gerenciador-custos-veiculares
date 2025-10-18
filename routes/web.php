@@ -8,6 +8,8 @@ use App\Http\Controllers\GastoController;
 use App\Http\Controllers\NotificacaoController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PainelController;
+
 
 // Página inicial
 Route::view('/', 'home')->name('landing');
@@ -71,6 +73,10 @@ Route::middleware('auth')->group(function () {
     // Linha do tempo de gastos por frota
     Route::get('/frotas/{frota}/gastos/linha-tempo', [GastoController::class, 'linhaTempoFrota'])
         ->name('frota.gastos.linha-tempo');
+
+    Route::get('/dashboard', [PainelController::class, 'index'])
+        ->middleware(['auth'])
+        ->name('dashboard');
 });
 
 require __DIR__ . '/auth.php';
