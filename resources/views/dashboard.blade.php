@@ -30,14 +30,14 @@
 
         <a href="{{ route('publico.index') }}" class="bg-white rounded-2xl shadow-lg p-6 transform transition hover:shadow-2xl hover:-translate-y-2 hover:scale-105 hover:bg-gray-200">
             <div class="text-3xl mb-3">🔎</div>
-            <h2 class="font-semibold text-lg">Buscar Veículos</h2>
-            <p class="text-sm text-gray-600 mt-2">Consulte veículos públicos e compare gastos.</p>
+            <h2 class="font-semibold text-lg">Consulta Pública</h2>
+            <p class="text-sm text-gray-600 mt-2">Visualize veículos e frotas públicos</p>
         </a>
 
         <a href="{{ route('publico.comparar') }}" class="bg-white rounded-2xl shadow-lg p-6 transform transition hover:shadow-2xl hover:-translate-y-2 hover:scale-105 hover:bg-gray-200">
             <div class="text-3xl mb-3">⚖️</div>
-            <h2 class="font-semibold text-lg">Comparar Veículos</h2>
-            <p class="text-sm text-gray-600 mt-2">Compare gastos entre dois veículos públicos.</p>
+            <h2 class="font-semibold text-lg">Comparar Gastos</h2>
+            <p class="text-sm text-gray-600 mt-2">Compare gastos entre veículos e frotas.</p>
         </a>
     </div>
 
@@ -68,27 +68,55 @@
             </div>
         </div>
 
-        <!-- Resumo de Responsabilidade -->
-        <div class="bg-white rounded-2xl shadow-lg p-6 h-[27rem] transform transition hover:shadow-2xl hover:-translate-y-2 hover:scale-105 flex flex-col justify-center items-center">
-            <h2 class="text-lg font-semibold mb-6 text-gray-800">Resumo do Usuário</h2>
+<!-- Resumo de Responsabilidade -->
+<div class="bg-white rounded-2xl shadow-lg p-6 h-[27rem] transform transition hover:shadow-2xl hover:-translate-y-2 hover:scale-105 flex flex-col">
+    <h2 class="text-lg font-semibold mb-8 text-gray-800 text-center">Resumo do Usuário</h2>
 
-            <div class="w-full text-center">
-                <p class="text-gray-600 text-sm mb-1">Total de Veículos (Dono ou Responsável)</p>
-                <p class="text-3xl font-bold text-blue-600 mb-6">
-                    {{ $veiculosComoDono + $veiculosComoResponsavel }}
-                </p>
+    <div class="grid grid-cols-2 gap-6 text-center">
+        <!-- Coluna Veículos -->
+        <div>
+            <h3 class="text-base font-semibold text-blue-600 mb-3">Veículos</h3>
+            <p class="text-gray-600 text-sm">Dono</p>
+            <p class="text-3xl font-bold text-blue-700 mb-2">{{ $veiculosComoDono }}</p>
 
-                <p class="text-gray-600 text-sm mb-1">Total de Frotas (Dono ou Responsável)</p>
-                <p class="text-3xl font-bold text-indigo-600 mb-6">
-                    {{ $frotasComoDono + $frotasComoResponsavel }}
-                </p>
+            <p class="text-gray-600 text-sm">Responsável</p>
+            <p class="text-3xl font-bold text-indigo-600 mb-2">{{ $veiculosComoResponsavel }}</p>
 
-                <p class="text-gray-600 text-sm mb-1">Total Geral</p>
-                <p class="text-3xl font-bold text-green-600">
-                    {{ $veiculosComoDono + $veiculosComoResponsavel + $frotasComoDono + $frotasComoResponsavel }}
-                </p>
-            </div>
+            <hr class="my-3 border-gray-200">
+            <p class="text-gray-600 text-sm">Total</p>
+            <p class="text-2xl font-bold text-green-600">
+                {{ $veiculosComoDono + $veiculosComoResponsavel }}
+            </p>
         </div>
+
+        <!-- Coluna Frotas -->
+        <div>
+            <h3 class="text-base font-semibold text-purple-600 mb-3">Frotas</h3>
+            <p class="text-gray-600 text-sm">Dono</p>
+            <p class="text-3xl font-bold text-purple-700 mb-2">{{ $frotasComoDono }}</p>
+
+            <p class="text-gray-600 text-sm">Responsável</p>
+            <p class="text-3xl font-bold text-indigo-500 mb-2">{{ $frotasComoResponsavel }}</p>
+
+            <hr class="my-3 border-gray-200">
+            <p class="text-gray-600 text-sm">Total</p>
+            <p class="text-2xl font-bold text-green-600">
+                {{ $frotasComoDono + $frotasComoResponsavel }}
+            </p>
+        </div>
+    </div>
+
+    <hr class="my-6 border-gray-300">
+    
+    <!-- Total Geral -->
+    <div class="text-center mt-auto">
+        <p class="text-gray-700 text-sm">Total Geral</p>
+        <p class="text-3xl font-bold text-emerald-600">
+            {{ $veiculosComoDono + $veiculosComoResponsavel + $frotasComoDono + $frotasComoResponsavel }}
+        </p>
+    </div>
+</div>
+
     </div>
 </div>
 

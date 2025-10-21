@@ -150,40 +150,40 @@
 {{-- SOBRE NÓS --}}
 <section id="sobre-nos" class="bg-white py-16">
   <div class="max-w-6xl mx-auto px-6 lg:px-8">
-    <div class="text-center mb-8">
+    <div class="text-center mb-10">
       <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
         Sobre Nós
       </h2>
-      <p class="mt-4 text-lg leading-8 text-gray-600 max-w-2xl mx-auto">
-        Nossa empresa é especializada no desenvolvimento de soluções para o gerenciamento de gastos veiculares.
-        Criamos ferramentas modernas, seguras e intuitivas que ajudam motoristas e empresas a controlarem
-        despesas, otimizarem a gestão de frotas e aumentarem a eficiência operacional.
+      <p class="mt-4 text-lg leading-8 text-gray-600 max-w-3xl mx-auto">
+        O <span class="font-semibold text-indigo-700">GestoCar</span> é uma plataforma desenvolvida para simplificar o 
+        gerenciamento de gastos veiculares. Nosso objetivo é oferecer soluções modernas, seguras e intuitivas que 
+        auxiliem motoristas e empresas a controlar despesas, otimizar a gestão de frotas e aumentar a eficiência operacional.
       </p>
     </div>
 
-    <div class="bg-white shadow-lg rounded-xl border border-gray-200 p-8">
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
+    <div class="bg-white shadow-lg rounded-2xl border border-gray-200 p-10">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-10 text-center sm:text-left">
         <div>
           <h3 class="text-lg font-semibold text-gray-900">Missão</h3>
           <p class="mt-2 text-gray-600">
-            Oferecer soluções digitais práticas e seguras para auxiliar no controle e
-            organização de despesas veiculares.
+            Oferecer soluções digitais práticas e seguras para auxiliar no controle 
+            e na organização das despesas veiculares.
           </p>
         </div>
 
         <div>
           <h3 class="text-lg font-semibold text-gray-900">Visão</h3>
           <p class="mt-2 text-gray-600">
-            Tornar-se referência no Brasil em tecnologia de gestão veicular, ajudando
-            pessoas e empresas a economizarem tempo e dinheiro.
+            Ser referência nacional em tecnologia de gestão veicular, contribuindo para 
+            que pessoas e empresas economizem tempo e recursos.
           </p>
         </div>
 
         <div>
           <h3 class="text-lg font-semibold text-gray-900">Valores</h3>
           <p class="mt-2 text-gray-600">
-            Compromisso com a qualidade, transparência nas informações e foco total na
-            experiência do usuário.
+            Comprometimento com a qualidade, transparência nas informações e foco total 
+            na experiência e satisfação do usuário.
           </p>
         </div>
       </div>
