@@ -56,4 +56,25 @@ class Notificacao extends Model
     {
         return 'notcodigo';
     }
+
+    /**
+     * Gera a mensagem descritiva conforme o tipo de notificação.
+     */
+    public function getMensagemAttribute()
+    {
+        switch ($this->tipo) {
+            case self::TIPO_CONVITE_VEICULO:
+                return "Você foi convidado para ser responsável pelo veículo: " .
+                    ($this->veiculo->modelo ?? 'Desconhecido') .
+                    ($this->remetente ? " (convite enviado por {$this->remetente->name})" : '');
+
+            case self::TIPO_CONVITE_FROTA:
+                return "Você foi convidado para participar da frota: " .
+                    ($this->frota->nome ?? 'Desconhecida') .
+                    ($this->remetente ? " (convite enviado por {$this->remetente->name})" : '');
+            default:
+                return "Nova notificação recebida.";
+        }
+    }
+
 }
