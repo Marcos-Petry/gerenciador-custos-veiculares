@@ -1,7 +1,7 @@
 <section class="max-w-2xl mx-auto bg-white shadow rounded-lg p-6">
     <header>
         <h2 class="text-lg font-medium text-red-600 flex items-center gap-2">
-            <span>🗑️</span> {{ __('Excluir Conta') }}
+            {{ __('Excluir Conta') }}
         </h2>
 
         <p class="mt-1 text-sm text-gray-600">
