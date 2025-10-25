@@ -5,64 +5,96 @@
     <h1 class="text-2xl font-bold text-white mb-6">🔎 Consulta Pública</h1>
 
     {{-- 🔹 Filtros --}}
-    <form method="GET" class="flex flex-wrap items-end gap-3 mb-6">
-        @if(isset($origem))
-        <button type="button" id="confirmarSelecao"
-            class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition flex items-center gap-2">
-            ✅ Confirmar Seleção
-        </button>
-        @endif
+    <form method="GET" id="form-filtros" class="flex flex-col gap-2 mb-6">
 
-        <div>
-            <label class="block text-white text-sm font-semibold mb-1">Campo</label>
-            <select name="campo" class="rounded-lg border-gray-300 px-3 py-1.5 w-44">
-                <option value="">Selecione</option>
-                <option value="titulo" {{ request('campo') == 'titulo' ? 'selected' : '' }}>Nome/Modelo</option>
-                <option value="placa" {{ request('campo') == 'placa' ? 'selected' : '' }}>Placa</option>
-                <option value="ano" {{ request('campo') == 'ano' ? 'selected' : '' }}>Ano</option>
-            </select>
+        <!-- 🔸 Filtro Exibir e Relacionamento -->
+        <div class="flex flex-wrap items-end gap-3 mb-3">
+            <div>
+                <label class="block text-white text-sm font-semibold mb-1">Exibir</label>
+                <select name="tipoFiltro" class="rounded-lg border-gray-300 px-3 py-1.5 w-44">
+                    <option value="">Todos</option>
+                    <option value="veiculo" {{ request('tipoFiltro') == 'veiculo' ? 'selected' : '' }}>Apenas Veículos</option>
+                    <option value="frota" {{ request('tipoFiltro') == 'frota' ? 'selected' : '' }}>Apenas Frotas</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-white text-sm font-semibold mb-1">Relacionamento</label>
+                <select name="relacionamentoFiltro" class="rounded-lg border-gray-300 px-3 py-1.5 w-56">
+                    <option value="">Todos os Veículos</option>
+                    <option value="com_frota" {{ request('relacionamentoFiltro') == 'com_frota' ? 'selected' : '' }}>Veículos com Frota</option>
+                    <option value="sem_frota" {{ request('relacionamentoFiltro') == 'sem_frota' ? 'selected' : '' }}>Veículos sem Frota</option>
+                </select>
+            </div>
         </div>
 
-        <div>
-            <label class="block text-white text-sm font-semibold mb-1">Operador</label>
-            <select name="operador" class="rounded-lg border-gray-300 px-3 py-1.5 w-48">
-                <option value="=" {{ request('operador') == '=' ? 'selected' : '' }}>Igual a (=)</option>
-                <option value="like" {{ request('operador') == 'like' ? 'selected' : '' }}>Contém</option>
-                <option value=">" {{ request('operador') == '>' ? 'selected' : '' }}>Maior que (>)</option>
-                <option value="<" {{ request('operador') == '<' ? 'selected' : '' }}>Menor que (<)< /option>
-            </select>
-        </div>
+        <!-- 🔸 Filtros dinâmicos -->
+        <div id="filtros-container" class="flex flex-col gap-3">
+            <div class="filtro-item flex flex-wrap items-end gap-3">
 
-        <div>
-            <label class="block text-white text-sm font-semibold mb-1">Valor</label>
-            <input type="text" name="valor" value="{{ request('valor') }}" placeholder="Digite o valor"
-                class="rounded-lg border-gray-300 px-3 py-1.5 w-80">
-        </div>
+                <!-- Campo -->
+                <div>
+                    <label class="block text-white text-sm font-semibold mb-1">Campo</label>
+                    <select name="campo[]" class="campo rounded-lg border-gray-300 px-3 py-1.5 w-44">
+                        <option value="titulo">Nome/Modelo</option>
+                        <option value="placa">Placa</option>
+                        <option value="ano">Ano</option>
+                        <option value="frota_nome">Nome da Frota</option>
+                    </select>
+                </div>
 
-        <div class="flex items-end gap-2">
-            <button type="submit"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Filtrar</button>
-            <a href="{{ route('publico.index') }}"
-                class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition">Limpar</a>
+                <!-- Operador -->
+                <div>
+                    <label class="block text-white text-sm font-semibold mb-1">Operador</label>
+                    <select name="operador[]" class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"></select>
+                </div>
+
+                <!-- Valor -->
+                <div class="valor-container flex items-end gap-2">
+                    <!-- Texto -->
+                    <div class="valor-texto">
+                        <label class="block text-white text-sm font-semibold mb-1">Valor</label>
+                        <input type="text" class="inp-texto rounded-lg border-gray-300 px-3 py-1.5 w-80"
+                               placeholder="Digite o valor">
+                    </div>
+
+                    <!-- Entre -->
+                    <div class="valor-entre hidden">
+                        <label class="block text-white text-sm font-semibold mb-1">Entre</label>
+                        <div class="flex gap-2">
+                            <input type="number" class="inp-de rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="De">
+                            <input type="number" class="inp-ate rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="Até">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões principais -->
+                <div class="flex items-end gap-2 botoes-principais">
+                    <button type="button" id="add-filtro"
+                            class="flex items-center justify-center w-8 h-8 bg-green-600 text-white rounded-full hover:bg-green-700 transition text-lg font-bold">+</button>
+
+                    <button type="submit"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Filtrar</button>
+
+                    <a href="{{ route('publico.index') }}"
+                       class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition">Limpar</a>
+                </div>
+
+                <!-- Remover -->
+                <button type="button"
+                        class="remover-filtro hidden text-red-500 hover:text-red-700 text-lg font-bold">×</button>
+            </div>
         </div>
     </form>
 
     {{-- 🔹 Cards --}}
     <form id="form-selecao-veiculos" method="GET" action="{{ route('publico.index') }}">
-        {{-- 🔸 parâmetros que o controller precisa --}}
         <input type="hidden" name="origemCampoExterno" value="{{ $origem ?? '' }}">
         <input type="hidden" name="selecionado" id="selecionadoInput">
 
-        {{-- 🔸 mantém os veículos já selecionados --}}
-        <input type="hidden" name="veiculoA" value="{{ request('veiculoA') }}">
-        <input type="hidden" name="veiculoB" value="{{ request('veiculoB') }}">
-
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($itens as $item)
-            <div
-                class="bg-white rounded-2xl shadow-lg overflow-hidden transform transition hover:shadow-2xl hover:-translate-y-2 hover:scale-[1.02]">
-
-                {{-- Imagem --}}
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden transform transition hover:shadow-2xl hover:-translate-y-2 hover:scale-[1.02]">
                 @if($item->foto)
                 <div class="w-full h-40 flex items-center justify-center overflow-hidden">
                     <img src="{{ asset('storage/' . $item->foto) }}" alt="Imagem" class="h-full w-auto object-cover">
@@ -87,9 +119,7 @@
                     <p class="text-sm text-gray-600">Ano: {{ $item->ano ?? '—' }}</p>
                     <p class="text-sm text-gray-600">Frota: {{ $item->frota_nome ?? '—' }}</p>
                     @else
-                    <p class="text-sm text-gray-600 mb-1">
-                        Criada em: {{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y') }}
-                    </p>
+                    <p class="text-sm text-gray-600 mb-1">Criada em: {{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y') }}</p>
                     @endif
 
                     <div class="flex justify-between items-center mt-4">
@@ -98,16 +128,6 @@
                             {{ $item->visibilidade ? 'Público' : 'Privado' }}
                         </span>
 
-                        {{-- 🔸 Checkbox de seleção no modo externo --}}
-                        @if(isset($origem) && $item->tipo === 'veiculo')
-                        <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                            <input type="checkbox"
-                                class="checkbox-selecao w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-                                value="{{ $item->id }}">
-                            <span>Selecionar</span>
-                        </label>
-                        @else
-                        {{-- 🔸 Ações normais --}}
                         <div class="flex gap-2">
                             <a href="{{ $item->tipo === 'veiculo'
                                         ? route('veiculo.show', $item->id)
@@ -123,7 +143,6 @@
                             </a>
                             @endif
                         </div>
-                        @endif
                     </div>
                 </div>
             </div>
@@ -135,39 +154,100 @@
 
     <!-- 🔹 Paginação -->
     <div class="mt-6 flex flex-col sm:flex-row justify-between items-center text-sm text-gray-700 gap-2">
-
-        <!-- Total de registros -->
         <div class="bg-white/40 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/30 shadow-sm">
             Exibindo <strong>{{ $itens->count() }}</strong> de <strong>{{ $itens->total() }}</strong> registros
         </div>
-
-        <!-- Links de paginação -->
-        <div>
-            {{ $itens->onEachSide(1)->links() }}
-        </div>
+        <div>{{ $itens->onEachSide(1)->links() }}</div>
     </div>
-
 </div>
 
+<!-- 🔹 Script -->
 <script>
-    // Permite selecionar apenas um checkbox por vez
-    document.querySelectorAll('.checkbox-selecao').forEach(cb => {
-        cb.addEventListener('change', function() {
-            document.querySelectorAll('.checkbox-selecao').forEach(o => {
-                if (o !== this) o.checked = false;
-            });
-        });
+const operadoresPorCampo = {
+    titulo: [
+        { valor: '=', texto: 'Igual a (=)' },
+        { valor: 'like', texto: 'Contém' },
+        { valor: 'starts', texto: 'Começa com' },
+        { valor: 'ends', texto: 'Termina com' },
+    ],
+    placa: [
+        { valor: '=', texto: 'Igual a (=)' },
+        { valor: 'like', texto: 'Contém' },
+    ],
+    ano: [
+        { valor: '=', texto: 'Igual a (=)' },
+        { valor: '>', texto: 'Maior que (>)' },
+        { valor: '<', texto: 'Menor que (<)' },
+        { valor: 'between', texto: 'Entre' },
+    ],
+    frota_nome: [
+        { valor: '=', texto: 'Igual a (=)' },
+        { valor: 'like', texto: 'Contém' },
+    ],
+};
+
+function mostrarSomente(mostra, ...esconde) {
+    mostra.classList.remove('hidden');
+    const ativo = mostra.querySelector('input,select');
+    if (ativo) ativo.disabled = false;
+    esconde.forEach(e => {
+        e.classList.add('hidden');
+        const i = e.querySelector('input,select');
+        if (i) i.disabled = true;
+    });
+}
+
+function atualizarLinha(item) {
+    const campo = item.querySelector('.campo');
+    const operador = item.querySelector('.operador');
+    const vTexto = item.querySelector('.valor-texto');
+    const vEntre = item.querySelector('.valor-entre');
+
+    const operadorSelecionado = operador.value;
+
+    operador.innerHTML = '';
+    (operadoresPorCampo[campo.value] || []).forEach(o => {
+        const opt = document.createElement('option');
+        opt.value = o.valor;
+        opt.textContent = o.texto;
+        operador.appendChild(opt);
     });
 
-    // Envia o formulário ao confirmar seleção
-    document.getElementById('confirmarSelecao')?.addEventListener('click', function() {
-        const selecionado = document.querySelector('.checkbox-selecao:checked');
-        if (!selecionado) {
-            alert('Selecione um veículo antes de confirmar.');
-            return;
-        }
-        document.getElementById('selecionadoInput').value = selecionado.value;
-        document.getElementById('form-selecao-veiculos').submit();
-    });
+    if ([...operador.options].some(opt => opt.value === operadorSelecionado)) {
+        operador.value = operadorSelecionado;
+    }
+
+    const opValue = operador.value;
+
+    if (campo.value === 'ano' && opValue === 'between') {
+        mostrarSomente(vEntre, vTexto);
+    } else {
+        mostrarSomente(vTexto, vEntre);
+    }
+}
+
+document.addEventListener('change', e => {
+    const item = e.target.closest('.filtro-item');
+    if (!item) return;
+    if (e.target.classList.contains('campo') || e.target.classList.contains('operador')) {
+        atualizarLinha(item);
+    }
+});
+
+document.getElementById('add-filtro').addEventListener('click', () => {
+    const container = document.getElementById('filtros-container');
+    const clone = container.querySelector('.filtro-item').cloneNode(true);
+    clone.querySelectorAll('input').forEach(i => i.value = '');
+    clone.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+    const botoes = clone.querySelector('.botoes-principais');
+    if (botoes) botoes.remove();
+    const rm = clone.querySelector('.remover-filtro');
+    rm.classList.remove('hidden');
+    rm.onclick = () => clone.remove();
+    atualizarLinha(clone);
+    container.appendChild(clone);
+});
+
+document.querySelectorAll('.filtro-item').forEach(atualizarLinha);
 </script>
 @endsection
