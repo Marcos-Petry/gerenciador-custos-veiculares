@@ -217,6 +217,7 @@
     function abrirSelecaoFrota() {
         const params = new URLSearchParams();
         params.set('origemCampoExterno', '1');
+        params.set('from', 'edit');
 
         const modelo = document.querySelector('[name="modelo"]')?.value || '';
         const placa = document.querySelector('[name="placa"]')?.value || '';
@@ -232,13 +233,13 @@
         if (visibilidade) params.set('visibilidade', visibilidade);
         if (veiculoId) params.set('veiculo_id', veiculoId);
 
-        // mantém responsáveis já adicionados
         document.querySelectorAll('[name="responsaveis[]"]').forEach(input => {
             params.append('responsaveis[]', input.value);
         });
 
         window.location.href = "{{ route('frota.index') }}" + "?" + params.toString();
     }
+
 
     /* busca usuário por e-mail e adiciona na lista */
     async function buscarResponsavel() {

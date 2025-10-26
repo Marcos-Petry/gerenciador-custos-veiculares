@@ -36,8 +36,18 @@ class VeiculoController extends Controller
 
     public function create(Request $request)
     {
-        return view('veiculo.create');
+        // 🔹 Verifica se veio da tela de seleção de frotas
+        $frotaSelecionada = null;
+        if ($request->has('frotas')) {
+            $ids = (array) $request->get('frotas');
+            $frotaSelecionada = \App\Models\Frota::whereIn('frota_id', $ids)->first();
+            // mantém o ID no request para exibir na view
+            $request->merge(['frota_id' => $frotaSelecionada?->frota_id]);
+        }
+
+        return view('veiculo.create', compact('frotaSelecionada'));
     }
+
 
     public function store(Request $request)
     {
@@ -181,32 +191,41 @@ class VeiculoController extends Controller
         }
     }
 
-    /**
-     * Atualiza as notificações ao editar responsáveis
-     */
-    private function atualizarNotificacoesResponsaveis(Veiculo $veiculo, array $novosResponsaveis): void
-    {
-        // IDs dos responsáveis já ativos
-        $responsaveisAtivos = $veiculo->responsavel()->pluck('users.id')->toArray();
+/**
+ * Atualiza as notificações de responsáveis de um veículo
+ * sem sobrescrever convites pendentes já existentes.
+ */
+private function atualizarNotificacoesResponsaveis(Veiculo $veiculo, array $novosResponsaveis): void
+{
+    // Responsáveis já ativos
+    $responsaveisAtivos = $veiculo->responsavel()->pluck('users.id')->toArray();
 
-        // Remove convites pendentes antigos que não estão mais na lista
-        Notificacao::where('veiculo_id', $veiculo->veiculo_id)
-            ->where('tipo', Notificacao::TIPO_CONVITE_VEICULO)
-            ->whereNotIn('usuario_destinatario_id', $novosResponsaveis)
-            ->delete();
+    // Usuários que já possuem algum convite (pendente, aceito ou recusado)
+    $jaConvidados = Notificacao::where('veiculo_id', $veiculo->veiculo_id)
+        ->where('tipo', Notificacao::TIPO_CONVITE_VEICULO)
+        ->pluck('usuario_destinatario_id')
+        ->toArray();
 
-        // Convites já existentes (pendentes ou respondidos)
-        $existentes = Notificacao::where('veiculo_id', $veiculo->veiculo_id)
-            ->where('tipo', Notificacao::TIPO_CONVITE_VEICULO)
-            ->pluck('usuario_destinatario_id')
-            ->toArray();
+    // Apenas cria convite se não for ativo nem já convidado
+    $novos = array_diff($novosResponsaveis, $responsaveisAtivos, $jaConvidados);
 
-        // Filtra apenas novos que não são responsáveis ativos nem já convidados
-        $novos = array_diff($novosResponsaveis, $existentes, $responsaveisAtivos);
-
-        // Cria convites apenas para os novos filtrados
-        $this->criarNotificacoesResponsaveis($veiculo, $novos);
+    foreach ($novos as $userId) {
+        Notificacao::create([
+            'usuario_remetente_id' => Auth::id(),
+            'usuario_destinatario_id' => $userId,
+            'veiculo_id' => $veiculo->veiculo_id,
+            'frota_id' => null,
+            'tipo' => Notificacao::TIPO_CONVITE_VEICULO,
+            'status' => Notificacao::STATUS_PENDENTE,
+            'data_envio' => now(),
+        ]);
     }
+
+    // 🔹 Não apaga convites antigos!
+    // O cancelamento deve ser feito manualmente pelo botão na interface.
+}
+
+
 
     public function indexPorFrota($frota_id)
     {

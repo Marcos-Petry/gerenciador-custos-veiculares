@@ -47,7 +47,7 @@
         <!-- Evolução de Gastos -->
         <div class="bg-white rounded-2xl shadow-lg p-6 h-[27rem] transform transition hover:shadow-2xl hover:-translate-y-2 hover:scale-105">
             <h2 class="text-lg font-semibold mb-4">Evolução de Gastos (últimos 5 meses)</h2>
-            <div class="flex items-center justify-center h-[85%]">
+            <div class="flex items-center justify-center h-[85%] overflow-visible">
                 <canvas id="evolucaoGastos"></canvas>
             </div>
         </div>
@@ -55,67 +55,67 @@
         <!-- Distribuição dos Gastos -->
         <div class="bg-white rounded-2xl shadow-lg p-6 h-[27rem] transform transition hover:shadow-2xl hover:-translate-y-2 hover:scale-105 relative">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold">Distribuição dos Gastos</h2>
+                <h2 class="text-lg font-semibold">Distribuição dos Gastos (últimos 5 meses)</h2>
                 <div class="text-right">
-                    <p class="text-gray-600 text-sm">Total este mês</p>
+                    <p class="text-gray-600 text-sm">Total</p>
                     <p class="text-2xl font-bold text-green-600">
                         R$ {{ number_format($gastosMes, 2, ',', '.') }}
                     </p>
                 </div>
             </div>
-            <div class="flex items-center justify-center h-[85%]">
+            <div class="flex items-center justify-center h-[85%] overflow-visible">
                 <canvas id="distribuicaoGastos"></canvas>
             </div>
         </div>
 
-<!-- Resumo de Responsabilidade -->
-<div class="bg-white rounded-2xl shadow-lg p-6 h-[27rem] transform transition hover:shadow-2xl hover:-translate-y-2 hover:scale-105 flex flex-col">
-    <h2 class="text-lg font-semibold mb-8 text-gray-800 text-center">Resumo do Usuário</h2>
+        <!-- Resumo de Responsabilidade -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 h-[27rem] transform transition hover:shadow-2xl hover:-translate-y-2 hover:scale-105 flex flex-col">
+            <h2 class="text-lg font-semibold mb-8 text-gray-800 text-center">Resumo do Usuário</h2>
 
-    <div class="grid grid-cols-2 gap-6 text-center">
-        <!-- Coluna Veículos -->
-        <div>
-            <h3 class="text-base font-semibold text-blue-600 mb-3">Veículos</h3>
-            <p class="text-gray-600 text-sm">Dono</p>
-            <p class="text-3xl font-bold text-blue-700 mb-2">{{ $veiculosComoDono }}</p>
+            <div class="grid grid-cols-2 gap-6 text-center">
+                <!-- Coluna Veículos -->
+                <div>
+                    <h3 class="text-base font-semibold text-blue-600 mb-3">Veículos</h3>
+                    <p class="text-gray-600 text-sm">Dono</p>
+                    <p class="text-3xl font-bold text-blue-700 mb-2">{{ $veiculosComoDono }}</p>
 
-            <p class="text-gray-600 text-sm">Responsável</p>
-            <p class="text-3xl font-bold text-indigo-600 mb-2">{{ $veiculosComoResponsavel }}</p>
+                    <p class="text-gray-600 text-sm">Responsável</p>
+                    <p class="text-3xl font-bold text-indigo-600 mb-2">{{ $veiculosComoResponsavel }}</p>
 
-            <hr class="my-3 border-gray-200">
-            <p class="text-gray-600 text-sm">Total</p>
-            <p class="text-2xl font-bold text-green-600">
-                {{ $veiculosComoDono + $veiculosComoResponsavel }}
-            </p>
+                    <hr class="my-3 border-gray-200">
+                    <p class="text-gray-600 text-sm">Total</p>
+                    <p class="text-2xl font-bold text-green-600">
+                        {{ $veiculosComoDono + $veiculosComoResponsavel }}
+                    </p>
+                </div>
+
+                <!-- Coluna Frotas -->
+                <div>
+                    <h3 class="text-base font-semibold text-purple-600 mb-3">Frotas</h3>
+                    <p class="text-gray-600 text-sm">Dono</p>
+                    <p class="text-3xl font-bold text-purple-700 mb-2">{{ $frotasComoDono }}</p>
+
+                    <p class="text-gray-600 text-sm">Responsável</p>
+                    <p class="text-3xl font-bold text-indigo-500 mb-2">{{ $frotasComoResponsavel }}</p>
+
+                    <hr class="my-3 border-gray-200">
+                    <p class="text-gray-600 text-sm">Total</p>
+                    <p class="text-2xl font-bold text-green-600">
+                        {{ $frotasComoDono + $frotasComoResponsavel }}
+                    </p>
+                </div>
+            </div>
+
+            <hr class="my-6 border-gray-300">
+            
+            <!-- Total Geral -->
+            <div class="text-center mt-auto">
+                <p class="text-gray-700 text-sm">Total Geral</p>
+                <p class="text-3xl font-bold text-emerald-600">
+                    {{ $veiculosComoDono + $veiculosComoResponsavel + $frotasComoDono + $frotasComoResponsavel }}
+                </p>
+            </div>
         </div>
-
-        <!-- Coluna Frotas -->
-        <div>
-            <h3 class="text-base font-semibold text-purple-600 mb-3">Frotas</h3>
-            <p class="text-gray-600 text-sm">Dono</p>
-            <p class="text-3xl font-bold text-purple-700 mb-2">{{ $frotasComoDono }}</p>
-
-            <p class="text-gray-600 text-sm">Responsável</p>
-            <p class="text-3xl font-bold text-indigo-500 mb-2">{{ $frotasComoResponsavel }}</p>
-
-            <hr class="my-3 border-gray-200">
-            <p class="text-gray-600 text-sm">Total</p>
-            <p class="text-2xl font-bold text-green-600">
-                {{ $frotasComoDono + $frotasComoResponsavel }}
-            </p>
-        </div>
-    </div>
-
-    <hr class="my-6 border-gray-300">
-    
-    <!-- Total Geral -->
-    <div class="text-center mt-auto">
-        <p class="text-gray-700 text-sm">Total Geral</p>
-        <p class="text-3xl font-bold text-emerald-600">
-            {{ $veiculosComoDono + $veiculosComoResponsavel + $frotasComoDono + $frotasComoResponsavel }}
-        </p>
-    </div>
-</div>
 
     </div>
 </div>
@@ -143,70 +143,81 @@ document.addEventListener("DOMContentLoaded", function () {
     const gastosPorCategoria = data.gastosPorCategoria || {};
 
     // ===== Gráfico de evolução =====
-    const ctxEvolucao = document.getElementById('evolucaoGastos');
-    if (ctxEvolucao) {
-        const meses = ['Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-        const labels = meses.slice(-5);
+const ctxEvolucao = document.getElementById('evolucaoGastos');
+if (ctxEvolucao) {
+    const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const agora = new Date();
+    const mesAtual = agora.getMonth(); // 0 = Jan, 11 = Dez
 
-        const valoresCompletos = labels.map(m => {
-            const i = labelsOriginais.indexOf(m);
-            return i !== -1 ? valoresOriginais[i] : 0;
-        });
+    // 🔹 Gera os últimos 5 meses (excluindo meses futuros)
+    const labels = Array.from({ length: 5 }, (_, i) => {
+        const mes = (mesAtual - 4 + i + 12) % 12;
+        return mesesNomes[mes];
+    });
 
-        new Chart(ctxEvolucao, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Gastos (R$)',
-                    data: valoresCompletos,
-                    backgroundColor: '#3b82f6',
-                    borderRadius: 8,
-                    barThickness: 40
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    datalabels: {
-                        anchor: 'end',
-                        align: 'top',
-                        color: '#111827',
-                        font: { weight: 'bold' },
-                        formatter: (val) => val > 0 ? `R$ ${val.toLocaleString('pt-BR')}` : ''
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: (ctx) => `R$ ${ctx.formattedValue.replace('.', ',')}`
-                        }
-                    }
+    // 🔹 Preenche os valores conforme labels do backend
+    const valoresCompletos = labels.map(m => {
+        const i = labelsOriginais.indexOf(m);
+        return i !== -1 ? valoresOriginais[i] : 0;
+    });
+
+    new Chart(ctxEvolucao, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Gastos (R$)',
+                data: valoresCompletos,
+                backgroundColor: '#3b82f6',
+                borderRadius: 8,
+                barThickness: 40
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                datalabels: {
+                    anchor: 'end',
+                    align: 'top',
+                    color: '#111827',
+                    font: { weight: 'bold' },
+                    formatter: (val) => val > 0 ? `R$ ${val.toLocaleString('pt-BR')}` : ''
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            color: '#4b5563',
-                            callback: (val) => `R$ ${val.toLocaleString('pt-BR')}`
-                        },
-                        grid: { color: '#e5e7eb' }
-                    },
-                    x: {
-                        ticks: { color: '#4b5563' },
-                        grid: { display: false }
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => `R$ ${ctx.formattedValue.replace('.', ',')}`
                     }
                 }
             },
-            plugins: [ChartDataLabels]
-        });
-    }
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#4b5563',
+                        callback: (val) => `R$ ${val.toLocaleString('pt-BR')}`
+                    },
+                    grid: { color: '#e5e7eb' }
+                },
+                x: {
+                    ticks: { color: '#4b5563' },
+                    grid: { display: false }
+                }
+            }
+        },
+        plugins: [ChartDataLabels]
+    });
+}
+
 
     // ===== Gráfico de distribuição =====
     const ctxDistribuicao = document.getElementById('distribuicaoGastos');
     if (ctxDistribuicao) {
         const categorias = Object.keys(gastosPorCategoria);
         const valoresCat = Object.values(gastosPorCategoria);
+        const maxValue = Math.max(...valoresCat);
+        const rightPadding = maxValue > 9999 ? 110 : 90;
 
         if (valoresCat.length > 0 && valoresCat.some(v => v > 0)) {
             new Chart(ctxDistribuicao, {
@@ -224,13 +235,18 @@ document.addEventListener("DOMContentLoaded", function () {
                     indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: { right: rightPadding }
+                    },
                     plugins: {
                         legend: { display: false },
                         datalabels: {
                             color: '#111827',
                             align: 'end',
                             anchor: 'end',
-                            font: { weight: 'bold' },
+                            clamp: false,
+                            clip: false,
+                            font: { size: 11, weight: 'bold' },
                             formatter: (val) => `R$ ${val.toLocaleString('pt-BR')}`
                         },
                         tooltip: {

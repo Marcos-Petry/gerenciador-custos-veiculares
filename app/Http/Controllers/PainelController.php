@@ -34,12 +34,13 @@ class PainelController extends Controller
         })->count();
 
         // 🔹 Total de gastos do mês atual
+        // 🔹 Total de gastos (últimos 5 meses)
         $gastosMes = Gasto::whereHas('veiculo', function ($q) use ($usuarioId) {
             $q->where('usuario_dono_id', $usuarioId);
         })
-            ->whereMonth('data_gasto', Carbon::now()->month)
-            ->whereYear('data_gasto', Carbon::now()->year)
+            ->where('data_gasto', '>=', Carbon::now()->subMonths(4)->startOfMonth()) // últimos 5 meses
             ->sum('valor');
+
 
         // 🔹 Gastos mensais (últimos 5 meses)
         $gastosMensais = Gasto::select(
@@ -64,17 +65,21 @@ class PainelController extends Controller
         }
 
         // 🔹 Distribuição dos gastos por categoria
+        // 🔹 Distribuição dos gastos por categoria (últimos 5 meses)
         if (Schema::hasColumn('gasto', 'categoria')) {
             $gastosPorCategoria = Gasto::select('categoria', DB::raw('SUM(valor) as total'))
                 ->whereHas('veiculo', function ($q) use ($usuarioId) {
                     $q->where('usuario_dono_id', $usuarioId);
                 })
+                ->where('data_gasto', '>=', Carbon::now()->subMonths(4)->startOfMonth()) // últimos 5 meses
                 ->groupBy('categoria')
+                ->orderBy('categoria')
                 ->get()
                 ->mapWithKeys(fn($item) => [$item->categoriaTexto() => floatval($item->total)]);
         } else {
             $gastosPorCategoria = collect();
         }
+
 
         // 🔹 Retorna tudo para a view
         return view('dashboard', compact(
