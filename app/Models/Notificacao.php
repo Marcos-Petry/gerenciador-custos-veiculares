@@ -24,11 +24,13 @@ class Notificacao extends Model
     // Constantes para tipos
     const TIPO_CONVITE_VEICULO = 1;
     const TIPO_CONVITE_FROTA   = 2;
+    const TIPO_AVISO_INTERNO   = 3;
 
     // Constantes para status
     const STATUS_PENDENTE = 0;
     const STATUS_ACEITO   = 1;
     const STATUS_RECUSADO = 2;
+    const STATUS_LIDO     = 3;
 
     // Relacionamentos
     public function remetente()

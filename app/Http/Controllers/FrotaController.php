@@ -23,9 +23,15 @@ class FrotaController extends Controller
         // 🔹 Paginação (mantém o ->paginate() pra usar onEachSide() na view)
         $frotas = $frotasQuery->paginate(6);
 
-        // 🔹 Adiciona uma flag "ehDono" pra controlar permissões na view
+        // 🔹 Adiciona flags de controle para a view
         $frotas->getCollection()->transform(function ($frota) use ($user) {
+            // Dono
             $frota->ehDono = $frota->usuario_dono_id === $user->id;
+
+            // Responsável (segue o mesmo padrão do ehDono)
+            $frota->ehResponsavel = $frota->responsavel
+                ->contains('usucodigo', $user->usucodigo);
+
             return $frota;
         });
 
@@ -34,6 +40,7 @@ class FrotaController extends Controller
 
         return view('frota.index', compact('frotas', 'origemCampoExterno'));
     }
+
 
 
     public function create(Request $request)
@@ -186,12 +193,13 @@ class FrotaController extends Controller
             }
 
             Notificacao::create([
-                'usuario_remetente_id' => Auth::id(),
+                'usuario_remetente_id'    => Auth::id(),
                 'usuario_destinatario_id' => $userId,
-                'veiculo_id' => null,
-                'frota_id' => $frota->frota_id,
-                'tipo' => Notificacao::TIPO_CONVITE_FROTA,
-                'status' => Notificacao::STATUS_PENDENTE,
+                'veiculo_id'              => null,
+                'frota_id'                => $frota->frota_id,
+                'tipo'                    => Notificacao::TIPO_CONVITE_FROTA,
+                'status'                  => Notificacao::STATUS_PENDENTE,
+                'data_envio'              => now(),
             ]);
         }
     }
@@ -219,5 +227,42 @@ class FrotaController extends Controller
         $novos = array_diff($novosResponsaveis, $existentes, $ativos);
 
         $this->criarNotificacoesResponsaveis($frota, $novos);
+    }
+
+    public function abandonarResponsabilidade(Frota $frota)
+    {
+        $user = Auth::user();
+
+        // Garante autenticação
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Sessão expirada. Faça login novamente.');
+        }
+
+        // Garante que a relação 'responsavel' está carregada
+        $frota->load('responsavel');
+
+        // Verifica se o usuário é realmente responsável
+        if (!$frota->responsavel->contains('id', $user->id)) {
+            return redirect()->back()->with('error', 'Você não é responsável por esta frota.');
+        }
+
+        // Remove o vínculo na tabela pivô
+        $frota->responsavel()->detach($user->id);
+
+        // Cria a notificação apenas se a frota tiver dono válido
+        if ($frota->usuario_dono_id) {
+            Notificacao::create([
+                'usuario_remetente_id'    => $user->id,                 // quem saiu
+                'usuario_destinatario_id' => $frota->usuario_dono_id,   // dono da frota
+                'frota_id'                => $frota->frota_id,          // frota
+                'tipo'                    => 3,                         // aviso interno
+                'status'                  => 0,                         // pendente
+                'data_envio'              => now(),
+            ]);
+        }
+
+        return redirect()
+            ->route('frota.index')
+            ->with('success', 'Você saiu da responsabilidade desta frota. O dono foi notificado.');
     }
 }

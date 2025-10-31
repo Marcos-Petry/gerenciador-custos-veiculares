@@ -5,12 +5,10 @@
 
     <h1 class="text-2xl font-bold text-white mb-6">💰 Meus Gastos</h1>
 
-    <!-- 🔹 Filtros -->
     <form method="GET" id="form-filtros" class="flex flex-col gap-2 mb-4">
         <div id="filtros-container" class="flex flex-col gap-3">
             <div class="filtro-item flex flex-wrap items-end gap-3">
 
-                <!-- Campo -->
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Campo</label>
                     <select name="campo[]" class="campo rounded-lg border-gray-300 px-3 py-1.5 w-44">
@@ -22,22 +20,18 @@
                     </select>
                 </div>
 
-                <!-- Operador -->
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Operador</label>
                     <select name="operador[]" class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"></select>
                 </div>
 
-                <!-- Valor -->
                 <div class="valor-container flex items-end gap-2">
-                    <!-- Texto -->
                     <div class="valor-texto">
                         <label class="block text-white text-sm font-semibold mb-1">Valor</label>
                         <input type="text" class="inp-texto rounded-lg border-gray-300 px-3 py-1.5 w-80"
                             placeholder="Digite o valor">
                     </div>
 
-                    <!-- Entre -->
                     <div class="valor-entre hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Entre</label>
                         <div class="flex gap-2">
@@ -48,13 +42,11 @@
                         </div>
                     </div>
 
-                    <!-- Data -->
                     <div class="valor-data hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Data</label>
                         <input type="date" class="inp-data rounded-lg border-gray-300 px-3 py-1.5 w-52">
                     </div>
 
-                    <!-- Categoria -->
                     <div class="valor-categoria hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Categoria</label>
                         <select class="sel-categoria rounded-lg border-gray-300 px-3 py-1.5 w-52" disabled>
@@ -68,7 +60,6 @@
                     </div>
                 </div>
 
-                <!-- Botões principais -->
                 <div class="flex items-end gap-2 botoes-principais">
                     <button type="button" id="add-filtro"
                         class="flex items-center justify-center w-8 h-8 bg-green-600 text-white rounded-full hover:bg-green-700 transition text-lg font-bold">+</button>
@@ -80,14 +71,12 @@
                         class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition">Limpar</a>
                 </div>
 
-                <!-- Remover -->
                 <button type="button"
                     class="remover-filtro hidden text-red-500 hover:text-red-700 text-lg font-bold">×</button>
             </div>
         </div>
     </form>
 
-    <!-- 🔹 Ações -->
     <div class="flex gap-2 mb-4">
         <a href="{{ route('gastos.create') }}"
             class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
@@ -107,7 +96,6 @@
         </button>
     </div>
 
-    <!-- 🔹 Tabela -->
     <div class="bg-white rounded-2xl shadow overflow-hidden">
         <table class="min-w-full border-collapse">
             <thead>
@@ -140,7 +128,6 @@
         </table>
     </div>
 
-    <!-- Paginação -->
     <div class="mt-6 flex flex-col sm:flex-row justify-between items-center text-sm text-gray-700 gap-2">
         <div class="bg-white/40 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/30 shadow-sm">
             Exibindo <strong>{{ $gastos->count() }}</strong> de <strong>{{ $gastos->total() }}</strong> registros
@@ -149,7 +136,6 @@
     </div>
 </div>
 
-<!-- 🔹 Script -->
 <script>
 const operadoresPorCampo = {
     veiculo: [
@@ -214,7 +200,6 @@ function atualizarLinha(item) {
 
     const opValue = operador.value;
 
-    // 🔸 Lógica para Data
     if (campo.value === 'data_gasto' && opValue === 'between') {
         const label = vData.querySelector('label');
         label.textContent = 'Entre';
@@ -255,7 +240,6 @@ function atualizarLinha(item) {
     }
 }
 
-// Eventos
 document.addEventListener('change', e => {
     const item = e.target.closest('.filtro-item');
     if (!item) return;
@@ -279,5 +263,56 @@ document.getElementById('add-filtro').addEventListener('click', () => {
 });
 
 document.querySelectorAll('.filtro-item').forEach(atualizarLinha);
+
+// Seleção de registros
+let linhaSelecionada = null;
+let idSelecionado = null;
+
+document.querySelectorAll('.linha-gasto').forEach(linha => {
+    linha.addEventListener('click', () => {
+        if (linhaSelecionada) linhaSelecionada.classList.remove('bg-blue-100');
+        linhaSelecionada = linha;
+        linhaSelecionada.classList.add('bg-blue-100');
+        idSelecionado = linha.getAttribute('data-id');
+        document.getElementById('btnEditar').disabled = false;
+        document.getElementById('btnVer').disabled = false;
+        document.getElementById('btnExcluir').disabled = false;
+    });
+});
+
+// Ações dos botões com rotas Laravel
+document.getElementById('btnEditar').addEventListener('click', () => {
+    if (idSelecionado) {
+        const url = @json(route('gastos.edit', ':id')).replace(':id', idSelecionado);
+        window.location.href = url;
+    }
+});
+
+document.getElementById('btnVer').addEventListener('click', () => {
+    if (idSelecionado) {
+        const url = @json(route('gastos.show', ':id')).replace(':id', idSelecionado);
+        window.location.href = url;
+    }
+});
+
+document.getElementById('btnExcluir').addEventListener('click', () => {
+    if (!idSelecionado) return;
+    if (confirm('Tem certeza que deseja excluir este gasto?')) {
+        fetch(@json(route('gastos.destroy', ':id')).replace(':id', idSelecionado), {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            },
+        })
+        .then(resp => {
+            if (resp.ok) {
+                alert('Gasto excluído com sucesso!');
+                location.reload();
+            } else {
+                alert('Erro ao excluir gasto.');
+            }
+        });
+    }
+});
 </script>
 @endsection

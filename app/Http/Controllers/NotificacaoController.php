@@ -12,31 +12,31 @@ use Illuminate\Support\Facades\Auth;
 class NotificacaoController extends Controller
 {
 
-public function index(Request $request)
-{
-    $filtro = $request->get('status', 'pendentes'); // padrão = pendentes
+    public function index(Request $request)
+    {
+        $filtro = $request->get('status', 'pendentes'); // padrão = pendentes
 
-    $query = Notificacao::where('usuario_destinatario_id', Auth::id())
-        ->latest();
+        $query = Notificacao::where('usuario_destinatario_id', Auth::id())
+            ->latest();
 
-    switch ($filtro) {
-        case 'aceitas':
-            $query->where('status', Notificacao::STATUS_ACEITO);
-            break;
-        case 'recusadas':
-            $query->where('status', Notificacao::STATUS_RECUSADO);
-            break;
-        case 'todas':
-            // sem filtro extra → mostra tudo
-            break;
-        default: // pendentes
-            $query->where('status', Notificacao::STATUS_PENDENTE);
+        switch ($filtro) {
+            case 'aceitas':
+                $query->where('status', Notificacao::STATUS_ACEITO);
+                break;
+            case 'recusadas':
+                $query->where('status', Notificacao::STATUS_RECUSADO);
+                break;
+            case 'todas':
+                // sem filtro extra → mostra tudo
+                break;
+            default: // pendentes
+                $query->where('status', Notificacao::STATUS_PENDENTE);
+        }
+
+        $notificacoes = $query->paginate(10);
+
+        return view('notificacao.index', compact('notificacoes', 'filtro'));
     }
-
-    $notificacoes = $query->paginate(10);
-
-    return view('notificacao.index', compact('notificacoes', 'filtro'));
-}
 
 
 
@@ -117,5 +117,34 @@ public function index(Request $request)
         $notificacao->delete();
 
         return response()->json(['success' => true]);
+    }
+
+    public function marcarComoLida($id)
+    {
+        $notificacao = Notificacao::findOrFail($id);
+
+        // Só notificações de aviso interno podem ser marcadas como lidas
+        if ($notificacao->tipo != 3) {
+            return back()->with('error', 'Apenas avisos do sistema podem ser marcados como lidos.');
+        }
+
+        $notificacao->status = Notificacao::STATUS_LIDO;
+        $notificacao->data_resposta = now();
+        $notificacao->save();
+
+        return back()->with('success', 'Notificação marcada como lida.');
+    }
+
+    public function avisos()
+    {
+        $notificacoes = Notificacao::where('usuario_destinatario_id', Auth::id())
+            ->where('tipo', 3) // tipo 3 = aviso interno
+            ->orderByDesc('created_at')
+            ->paginate(10);
+
+        return view('notificacao.index', [
+            'notificacoes' => $notificacoes,
+            'filtro' => 'avisos'
+        ]);
     }
 }

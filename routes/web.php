@@ -77,6 +77,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [PainelController::class, 'index'])
         ->middleware(['auth'])
         ->name('dashboard');
+
+    Route::post('/frota/{frota}/abandonar', [FrotaController::class, 'abandonarResponsabilidade'])
+        ->name('frota.abandonar');
+
+    Route::post('/notificacao/lida/{id}', [NotificacaoController::class, 'marcarComoLida'])
+        ->name('notificacao.lida');
+
+    Route::get('/notificacao/avisos', [NotificacaoController::class, 'avisos'])
+        ->name('notificacao.avisos');
 });
 
 require __DIR__ . '/auth.php';
