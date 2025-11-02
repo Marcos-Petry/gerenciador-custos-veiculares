@@ -5,48 +5,59 @@
 
     <h1 class="text-2xl font-bold text-white mb-6">💰 Meus Gastos</h1>
 
+    <!-- 🔹 Filtros -->
     <form method="GET" id="form-filtros" class="flex flex-col gap-2 mb-4">
         <div id="filtros-container" class="flex flex-col gap-3">
             <div class="filtro-item flex flex-wrap items-end gap-3">
 
+                <!-- Campo -->
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Campo</label>
                     <select name="campo[]" class="campo rounded-lg border-gray-300 px-3 py-1.5 w-44">
                         <option value="veiculo">Veículo</option>
+                        <option value="frota">Frota</option>
                         <option value="descricao">Descrição</option>
                         <option value="valor">Valor</option>
                         <option value="data_gasto">Data</option>
                         <option value="categoria">Categoria</option>
+                        <option value="usuario">Incluído por</option>
+                        <option value="vinculo">Vínculo</option>
+                        <option value="anexos">Anexos</option>
                     </select>
                 </div>
 
+                <!-- Operador -->
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Operador</label>
                     <select name="operador[]" class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"></select>
                 </div>
 
+                <!-- Valores -->
                 <div class="valor-container flex items-end gap-2">
+
+                    <!-- Texto -->
                     <div class="valor-texto">
                         <label class="block text-white text-sm font-semibold mb-1">Valor</label>
                         <input type="text" class="inp-texto rounded-lg border-gray-300 px-3 py-1.5 w-80"
                             placeholder="Digite o valor">
                     </div>
 
+                    <!-- Entre -->
                     <div class="valor-entre hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Entre</label>
                         <div class="flex gap-2">
-                            <input type="number" class="inp-de rounded-lg border-gray-300 px-3 py-1.5 w-28"
-                                placeholder="De">
-                            <input type="number" class="inp-ate rounded-lg border-gray-300 px-3 py-1.5 w-28"
-                                placeholder="Até">
+                            <input type="number" class="inp-de rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="De">
+                            <input type="number" class="inp-ate rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="Até">
                         </div>
                     </div>
 
+                    <!-- Data -->
                     <div class="valor-data hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Data</label>
                         <input type="date" class="inp-data rounded-lg border-gray-300 px-3 py-1.5 w-52">
                     </div>
 
+                    <!-- Categoria -->
                     <div class="valor-categoria hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Categoria</label>
                         <select class="sel-categoria rounded-lg border-gray-300 px-3 py-1.5 w-52" disabled>
@@ -58,8 +69,47 @@
                             <option value="5">Outros</option>
                         </select>
                     </div>
+
+                    <!-- Frota -->
+                    <div class="valor-frota hidden">
+                        <label class="block text-white text-sm font-semibold mb-1">Frota</label>
+                        <select class="sel-frota rounded-lg border-gray-300 px-3 py-1.5 w-64" disabled>
+                            <option value="">Selecione a frota</option>
+                            @foreach($frotas as $f)
+                                <option value="{{ $f->frota_id }}">{{ $f->nome }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Vínculo -->
+                    <div class="valor-vinculo hidden">
+                        <label class="block text-white text-sm font-semibold mb-1">Vínculo</label>
+                        <select class="sel-vinculo rounded-lg border-gray-300 px-3 py-1.5 w-52" disabled>
+                            <option value="">Selecione</option>
+                            <option value="dono">Sou dono</option>
+                            <option value="responsavel">Sou responsável</option>
+                        </select>
+                    </div>
+
+                    <!-- Usuário -->
+                    <div class="valor-usuario hidden">
+                        <label class="block text-white text-sm font-semibold mb-1">Incluído por</label>
+                        <input type="text" class="inp-usuario rounded-lg border-gray-300 px-3 py-1.5 w-72"
+                            placeholder="Nome do usuário" disabled>
+                    </div>
+
+                    <!-- Anexos -->
+                    <div class="valor-anexo hidden">
+                        <label class="block text-white text-sm font-semibold mb-1">Anexos</label>
+                        <select class="sel-anexo rounded-lg border-gray-300 px-3 py-1.5 w-52" disabled>
+                            <option value="">Selecione</option>
+                            <option value="com">Com anexos</option>
+                            <option value="sem">Sem anexos</option>
+                        </select>
+                    </div>
                 </div>
 
+                <!-- Botões -->
                 <div class="flex items-end gap-2 botoes-principais">
                     <button type="button" id="add-filtro"
                         class="flex items-center justify-center w-8 h-8 bg-green-600 text-white rounded-full hover:bg-green-700 transition text-lg font-bold">+</button>
@@ -77,34 +127,28 @@
         </div>
     </form>
 
+    <!-- 🔹 Ações -->
     <div class="flex gap-2 mb-4">
         <a href="{{ route('gastos.create') }}"
-            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-            ➕ Inserir
-        </a>
+            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">➕ Incluir</a>
 
-        <button id="btnEditar" class="px-4 py-2 bg-yellow-500 text-white rounded-lg disabled:opacity-50" disabled>
-            ✏️ Editar
-        </button>
-
-        <button id="btnVer" class="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50" disabled>
-            👁️ Visualizar
-        </button>
-
-        <button id="btnExcluir" class="px-4 py-2 bg-red-600 text-white rounded-lg disabled:opacity-50" disabled>
-            🗑️ Excluir
-        </button>
+        <button id="btnEditar" class="px-4 py-2 bg-yellow-500 text-white rounded-lg disabled:opacity-50" disabled>✏️ Editar</button>
+        <button id="btnVer" class="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50" disabled>👁️ Visualizar</button>
+        <button id="btnExcluir" class="px-4 py-2 bg-red-600 text-white rounded-lg disabled:opacity-50" disabled>🗑️ Excluir</button>
     </div>
 
+    <!-- 🔹 Tabela -->
     <div class="bg-white rounded-2xl shadow overflow-hidden">
         <table class="min-w-full border-collapse">
             <thead>
                 <tr class="bg-gray-100">
                     <th class="px-6 py-3 text-left font-semibold">Veículo</th>
+                    <th class="px-6 py-3 text-left font-semibold">Frota</th>
                     <th class="px-6 py-3 text-left font-semibold">Categoria</th>
                     <th class="px-6 py-3 text-left font-semibold">Descrição</th>
                     <th class="px-6 py-3 text-left font-semibold">Valor</th>
                     <th class="px-6 py-3 text-left font-semibold">Data</th>
+                    <th class="px-6 py-3 text-left font-semibold">Incluído por</th>
                     <th class="px-4 py-3 text-center font-semibold w-16">Anexos</th>
                 </tr>
             </thead>
@@ -113,21 +157,24 @@
                 <tr class="linha-gasto border-t hover:bg-gray-50 transition cursor-pointer"
                     data-id="{{ $gasto->gasto_id }}">
                     <td class="px-6 py-3">{{ $gasto->veiculo->modelo }} ({{ $gasto->veiculo->placa }})</td>
+                    <td class="px-6 py-3">{{ $gasto->veiculo->frota->nome ?? '—' }}</td>
                     <td class="px-6 py-3">{{ $gasto->categoriaTexto() }}</td>
                     <td class="px-6 py-3">{{ $gasto->descricao ?? '—' }}</td>
                     <td class="px-6 py-3">R$ {{ number_format($gasto->valor, 2, ',', '.') }}</td>
                     <td class="px-6 py-3">{{ \Carbon\Carbon::parse($gasto->data_gasto)->format('d/m/Y') }}</td>
+                    <td class="px-6 py-3">{{ $gasto->usuario->name ?? 'Desconhecido' }}</td>
                     <td class="px-4 py-3 text-center">@if($gasto->anexos->count() > 0)📎@endif</td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="text-center py-4 text-gray-500">Nenhum gasto encontrado.</td>
+                    <td colspan="8" class="text-center py-4 text-gray-500">Nenhum gasto encontrado.</td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 
+    <!-- Paginação -->
     <div class="mt-6 flex flex-col sm:flex-row justify-between items-center text-sm text-gray-700 gap-2">
         <div class="bg-white/40 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/30 shadow-sm">
             Exibindo <strong>{{ $gastos->count() }}</strong> de <strong>{{ $gastos->total() }}</strong> registros
@@ -138,31 +185,15 @@
 
 <script>
 const operadoresPorCampo = {
-    veiculo: [
-        { valor: '=', texto: 'Igual a (=)' },
-        { valor: 'like', texto: 'Contém' },
-        { valor: 'starts', texto: 'Começa com' },
-        { valor: 'ends', texto: 'Termina com' },
-    ],
-    descricao: [
-        { valor: '=', texto: 'Igual a (=)' },
-        { valor: 'like', texto: 'Contém' },
-        { valor: 'starts', texto: 'Começa com' },
-        { valor: 'ends', texto: 'Termina com' },
-    ],
-    valor: [
-        { valor: '=', texto: 'Igual a (=)' },
-        { valor: '>', texto: 'Maior que (>)' },
-        { valor: '<', texto: 'Menor que (<)' },
-        { valor: 'between', texto: 'Entre' },
-    ],
-    data_gasto: [
-        { valor: '=', texto: 'Igual a (=)' },
-        { valor: '>', texto: 'Após (>)' },
-        { valor: '<', texto: 'Antes (<)' },
-        { valor: 'between', texto: 'Entre' },
-    ],
+    veiculo: [{ valor: '=', texto: 'Igual a (=)' }, { valor: 'like', texto: 'Contém' }],
+    frota: [{ valor: '=', texto: 'Igual a (=)' }],
+    descricao: [{ valor: '=', texto: 'Igual a (=)' }, { valor: 'like', texto: 'Contém' }],
+    valor: [{ valor: '=', texto: 'Igual a (=)' }, { valor: '>', texto: 'Maior que (>)' }, { valor: '<', texto: 'Menor que (<)' }, { valor: 'between', texto: 'Entre' }],
+    data_gasto: [{ valor: '=', texto: 'Igual a (=)' }, { valor: '>', texto: 'Após (>)' }, { valor: '<', texto: 'Antes (<)' }, { valor: 'between', texto: 'Entre' }],
     categoria: [{ valor: '=', texto: 'Igual a (=)' }],
+    usuario: [{ valor: '=', texto: 'Igual a (=)' }, { valor: 'like', texto: 'Contém' }],
+    vinculo: [{ valor: '=', texto: 'Igual a (=)' }],
+    anexos: [{ valor: '=', texto: 'Igual a (=)' }],
 };
 
 function mostrarSomente(mostra, ...esconde) {
@@ -183,9 +214,12 @@ function atualizarLinha(item) {
     const vEntre = item.querySelector('.valor-entre');
     const vData = item.querySelector('.valor-data');
     const vCat = item.querySelector('.valor-categoria');
+    const vUsu = item.querySelector('.valor-usuario');
+    const vVin = item.querySelector('.valor-vinculo');
+    const vFro = item.querySelector('.valor-frota');
+    const vAnx = item.querySelector('.valor-anexo');
 
     const operadorSelecionado = operador.value;
-
     operador.innerHTML = '';
     (operadoresPorCampo[campo.value] || []).forEach(o => {
         const opt = document.createElement('option');
@@ -193,59 +227,25 @@ function atualizarLinha(item) {
         opt.textContent = o.texto;
         operador.appendChild(opt);
     });
+    if ([...operador.options].some(opt => opt.value === operadorSelecionado)) operador.value = operadorSelecionado;
 
-    if ([...operador.options].some(opt => opt.value === operadorSelecionado)) {
-        operador.value = operadorSelecionado;
-    }
+    const op = operador.value;
 
-    const opValue = operador.value;
-
-    if (campo.value === 'data_gasto' && opValue === 'between') {
-        const label = vData.querySelector('label');
-        label.textContent = 'Entre';
-        const inputExistente = vData.querySelector('.inp-data');
-        const container = vData.querySelector('.data-range');
-
-        if (!container) {
-            const div = document.createElement('div');
-            div.classList.add('flex', 'gap-2', 'data-range');
-            div.innerHTML = `
-                <input type="date" class="inp-data-de rounded-lg border-gray-300 px-3 py-1.5 w-40">
-                <input type="date" class="inp-data-ate rounded-lg border-gray-300 px-3 py-1.5 w-40">
-            `;
-            inputExistente.replaceWith(div);
-        }
-        mostrarSomente(vData, vTexto, vEntre, vCat);
-    }
-    else if (campo.value === 'data_gasto') {
-        const label = vData.querySelector('label');
-        label.textContent = 'Data';
-        if (!vData.querySelector('.inp-data')) {
-            vData.querySelector('.data-range')?.remove();
-            const input = document.createElement('input');
-            input.type = 'date';
-            input.classList.add('inp-data', 'rounded-lg', 'border-gray-300', 'px-3', 'py-1.5', 'w-52');
-            vData.appendChild(input);
-        }
-        mostrarSomente(vData, vTexto, vEntre, vCat);
-    }
-    else if (campo.value === 'categoria') {
-        mostrarSomente(vCat, vTexto, vEntre, vData);
-    }
-    else if (campo.value === 'valor' && opValue === 'between') {
-        mostrarSomente(vEntre, vTexto, vData, vCat);
-    }
-    else {
-        mostrarSomente(vTexto, vEntre, vData, vCat);
-    }
+    if (campo.value === 'frota') mostrarSomente(vFro, vTexto, vEntre, vData, vCat, vUsu, vVin, vAnx);
+    else if (campo.value === 'anexos') mostrarSomente(vAnx, vTexto, vEntre, vData, vCat, vUsu, vVin, vFro);
+    else if (campo.value === 'data_gasto' && op === 'between') mostrarSomente(vData, vTexto, vEntre, vCat, vUsu, vVin, vFro, vAnx);
+    else if (campo.value === 'data_gasto') mostrarSomente(vData, vTexto, vEntre, vCat, vUsu, vVin, vFro, vAnx);
+    else if (campo.value === 'categoria') mostrarSomente(vCat, vTexto, vEntre, vData, vUsu, vVin, vFro, vAnx);
+    else if (campo.value === 'valor' && op === 'between') mostrarSomente(vEntre, vTexto, vData, vCat, vUsu, vVin, vFro, vAnx);
+    else if (campo.value === 'usuario') mostrarSomente(vUsu, vTexto, vEntre, vData, vCat, vVin, vFro, vAnx);
+    else if (campo.value === 'vinculo') mostrarSomente(vVin, vTexto, vEntre, vData, vCat, vUsu, vFro, vAnx);
+    else mostrarSomente(vTexto, vEntre, vData, vCat, vUsu, vVin, vFro, vAnx);
 }
 
 document.addEventListener('change', e => {
     const item = e.target.closest('.filtro-item');
     if (!item) return;
-    if (e.target.classList.contains('campo') || e.target.classList.contains('operador')) {
-        atualizarLinha(item);
-    }
+    if (e.target.classList.contains('campo') || e.target.classList.contains('operador')) atualizarLinha(item);
 });
 
 document.getElementById('add-filtro').addEventListener('click', () => {
@@ -264,10 +264,9 @@ document.getElementById('add-filtro').addEventListener('click', () => {
 
 document.querySelectorAll('.filtro-item').forEach(atualizarLinha);
 
-// Seleção de registros
+// seleção + botões CRUD
 let linhaSelecionada = null;
 let idSelecionado = null;
-
 document.querySelectorAll('.linha-gasto').forEach(linha => {
     linha.addEventListener('click', () => {
         if (linhaSelecionada) linhaSelecionada.classList.remove('bg-blue-100');
@@ -280,38 +279,19 @@ document.querySelectorAll('.linha-gasto').forEach(linha => {
     });
 });
 
-// Ações dos botões com rotas Laravel
 document.getElementById('btnEditar').addEventListener('click', () => {
-    if (idSelecionado) {
-        const url = @json(route('gastos.edit', ':id')).replace(':id', idSelecionado);
-        window.location.href = url;
-    }
+    if (idSelecionado) window.location.href = @json(route('gastos.edit', ':id')).replace(':id', idSelecionado);
 });
-
 document.getElementById('btnVer').addEventListener('click', () => {
-    if (idSelecionado) {
-        const url = @json(route('gastos.show', ':id')).replace(':id', idSelecionado);
-        window.location.href = url;
-    }
+    if (idSelecionado) window.location.href = @json(route('gastos.show', ':id')).replace(':id', idSelecionado);
 });
-
 document.getElementById('btnExcluir').addEventListener('click', () => {
     if (!idSelecionado) return;
     if (confirm('Tem certeza que deseja excluir este gasto?')) {
         fetch(@json(route('gastos.destroy', ':id')).replace(':id', idSelecionado), {
             method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            },
-        })
-        .then(resp => {
-            if (resp.ok) {
-                alert('Gasto excluído com sucesso!');
-                location.reload();
-            } else {
-                alert('Erro ao excluir gasto.');
-            }
-        });
+            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+        }).then(r => r.ok ? location.reload() : alert('Erro ao excluir gasto.'));
     }
 });
 </script>

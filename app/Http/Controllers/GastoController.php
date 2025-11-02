@@ -15,19 +15,24 @@ class GastoController extends Controller
     {
         $user = Auth::user();
 
-        $gastos = Gasto::with(['veiculo.frota', 'usuario'])
+        // 🔹 1. Carrega todas as frotas do usuário (dono ou responsável)
+        $frotas = \App\Models\Frota::where('usuario_dono_id', $user->id)
+            ->orWhereHas('responsavel', fn($q) => $q->where('usucodigo', $user->id))
+            ->orderBy('nome')
+            ->get();
+
+        // 🔹 2. Monta a consulta principal de gastos
+        $gastos = \App\Models\Gasto::with(['veiculo.frota', 'usuario'])
             ->whereHas('veiculo', function ($q) use ($user) {
                 $q->where('usuario_dono_id', $user->id)
-                    ->orWhereHas('responsavel', function ($r) use ($user) {
-                        $r->where('users.id', $user->id);
-                    })
-                    ->orWhereHas('frota.responsavel', function ($r) use ($user) {
-                        $r->where('usucodigo', $user->id);
-                    });
+                    ->orWhereHas('responsavel', fn($r) => $r->where('users.id', $user->id))
+                    ->orWhereHas('frota.responsavel', fn($r) => $r->where('usucodigo', $user->id));
             })
+            // 🔹 Filtro por categoria
             ->when($request->filled('categoria'), function ($q) use ($request) {
                 $q->where('categoria', $request->categoria);
             })
+            // 🔹 Filtro dinâmico (campo + operador + valor)
             ->when($request->filled('campo') && $request->filled('valor'), function ($q) use ($request) {
                 $campo = $request->campo;
                 $operador = $request->operador ?? '=';
@@ -42,8 +47,10 @@ class GastoController extends Controller
             ->orderBy('data_gasto', 'desc')
             ->paginate(10);
 
-        return view('gasto.index', compact('gastos'));
+        // 🔹 3. Retorna a view com ambos
+        return view('gasto.index', compact('gastos', 'frotas'));
     }
+
 
     public function indexPorVeiculo(Veiculo $veiculo)
     {
@@ -208,16 +215,54 @@ class GastoController extends Controller
             ->with('success', 'Gasto excluído com sucesso!');
     }
 
-    public function indexPorFrota($frota_id)
-    {
-        $frota = \App\Models\Frota::with('veiculos.gastos')->findOrFail($frota_id);
+    public function indexPorFrota($frota_id, Request $request)
+{
+    $user = Auth::user();
+    $frota = \App\Models\Frota::with('veiculos.gastos')->findOrFail($frota_id);
 
-        $gastos = Gasto::whereIn('veiculo_id', $frota->veiculos->pluck('veiculo_id'))
-            ->orderBy('data_gasto', 'desc')
-            ->paginate(10);
+    // 🔹 Base: todos os gastos da frota
+    $gastos = Gasto::with(['veiculo.frota', 'usuario'])
+        ->whereIn('veiculo_id', $frota->veiculos->pluck('veiculo_id'))
 
-        return view('gasto.index_por_frota', compact('frota', 'gastos'));
-    }
+        // 🔹 Filtro de vínculo (dono / responsável)
+        ->when($request->filled('vinculo'), function ($q) use ($request, $user) {
+            if ($request->vinculo === 'dono') {
+                $q->whereHas('veiculo', fn($v) => $v->where('usuario_dono_id', $user->id));
+            } elseif ($request->vinculo === 'responsavel') {
+                $q->whereHas('veiculo.responsavel', fn($r) => $r->where('users.id', $user->id));
+            }
+        })
+
+        // Filtro por categoria
+        ->when($request->filled('categoria'), function ($q) use ($request) {
+            $q->where('categoria', $request->categoria);
+        })
+
+        // Filtro dinâmico (campo, operador, valor)
+        ->when($request->filled('campo') && $request->filled('valor'), function ($q) use ($request) {
+            $campo = $request->campo;
+            $operador = $request->operador ?? '=';
+            $valor = $request->valor;
+
+            if ($operador === 'like') {
+                $q->where($campo, 'like', '%' . $valor . '%');
+            } else {
+                $q->where($campo, $operador, $valor);
+            }
+        })
+
+        // Filtro por usuário (campo “Incluído por”)
+        ->when($request->filled('usuario'), function ($q) use ($request) {
+            $nome = $request->usuario;
+            $q->whereHas('usuario', fn($u) => $u->where('name', 'like', "%{$nome}%"));
+        })
+
+        ->orderBy('data_gasto', 'desc')
+        ->paginate(10);
+
+    return view('gasto.index_por_frota', compact('frota', 'gastos'));
+}
+
 
     public function createPorFrota($frotaId)
     {

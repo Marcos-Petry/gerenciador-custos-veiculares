@@ -154,10 +154,9 @@ class VeiculoController extends Controller
 
         $veiculo->update($data);
 
-        // Atualizar notificações (remove pendentes antigos e recria)
-        if ($request->filled('responsaveis')) {
-            $this->atualizarNotificacoesResponsaveis($veiculo, $request->responsaveis);
-        }
+        // Atualizar responsáveis (adição e remoção)
+        $this->sincronizarResponsaveis($veiculo, $request->input('responsaveis', []));
+
 
         return redirect()->route('veiculo.index')
             ->with('success', 'Veículo atualizado com sucesso!');
@@ -191,39 +190,39 @@ class VeiculoController extends Controller
         }
     }
 
-/**
- * Atualiza as notificações de responsáveis de um veículo
- * sem sobrescrever convites pendentes já existentes.
- */
-private function atualizarNotificacoesResponsaveis(Veiculo $veiculo, array $novosResponsaveis): void
-{
-    // Responsáveis já ativos
-    $responsaveisAtivos = $veiculo->responsavel()->pluck('users.id')->toArray();
+    /**
+     * Atualiza as notificações de responsáveis de um veículo
+     * sem sobrescrever convites pendentes já existentes.
+     */
+    private function atualizarNotificacoesResponsaveis(Veiculo $veiculo, array $novosResponsaveis): void
+    {
+        // Responsáveis já ativos
+        $responsaveisAtivos = $veiculo->responsavel()->pluck('users.id')->toArray();
 
-    // Usuários que já possuem algum convite (pendente, aceito ou recusado)
-    $jaConvidados = Notificacao::where('veiculo_id', $veiculo->veiculo_id)
-        ->where('tipo', Notificacao::TIPO_CONVITE_VEICULO)
-        ->pluck('usuario_destinatario_id')
-        ->toArray();
+        // Usuários que já possuem algum convite (pendente, aceito ou recusado)
+        $jaConvidados = Notificacao::where('veiculo_id', $veiculo->veiculo_id)
+            ->where('tipo', Notificacao::TIPO_CONVITE_VEICULO)
+            ->pluck('usuario_destinatario_id')
+            ->toArray();
 
-    // Apenas cria convite se não for ativo nem já convidado
-    $novos = array_diff($novosResponsaveis, $responsaveisAtivos, $jaConvidados);
+        // Apenas cria convite se não for ativo nem já convidado
+        $novos = array_diff($novosResponsaveis, $responsaveisAtivos, $jaConvidados);
 
-    foreach ($novos as $userId) {
-        Notificacao::create([
-            'usuario_remetente_id' => Auth::id(),
-            'usuario_destinatario_id' => $userId,
-            'veiculo_id' => $veiculo->veiculo_id,
-            'frota_id' => null,
-            'tipo' => Notificacao::TIPO_CONVITE_VEICULO,
-            'status' => Notificacao::STATUS_PENDENTE,
-            'data_envio' => now(),
-        ]);
+        foreach ($novos as $userId) {
+            Notificacao::create([
+                'usuario_remetente_id' => Auth::id(),
+                'usuario_destinatario_id' => $userId,
+                'veiculo_id' => $veiculo->veiculo_id,
+                'frota_id' => null,
+                'tipo' => Notificacao::TIPO_CONVITE_VEICULO,
+                'status' => Notificacao::STATUS_PENDENTE,
+                'data_envio' => now(),
+            ]);
+        }
+
+        // 🔹 Não apaga convites antigos!
+        // O cancelamento deve ser feito manualmente pelo botão na interface.
     }
-
-    // 🔹 Não apaga convites antigos!
-    // O cancelamento deve ser feito manualmente pelo botão na interface.
-}
 
 
 
@@ -252,5 +251,58 @@ private function atualizarNotificacoesResponsaveis(Veiculo $veiculo, array $novo
             ->paginate(9);
 
         return view('veiculo.index_por_frota', compact('frota', 'veiculos', 'modoSomenteVisualizacao'));
+    }
+    /**
+     * Sincroniza os responsáveis de um veículo (adiciona, mantém e remove)
+     * e cria notificações adequadas (convite ou aviso de remoção).
+     */
+    private function sincronizarResponsaveis(Veiculo $veiculo, array $novosResponsaveis): void
+    {
+        // Responsáveis atuais
+        $atuais = $veiculo->responsavel()->pluck('users.id')->toArray();
+
+        // Quem foi removido
+        $removidos = array_diff($atuais, $novosResponsaveis);
+        // Quem é novo
+        $novos = array_diff($novosResponsaveis, $atuais);
+
+        // 🔹 Remove responsáveis antigos e manda aviso
+        foreach ($removidos as $userId) {
+            $veiculo->responsavel()->detach($userId);
+
+            // Envia aviso de remoção (não é convite)
+            Notificacao::create([
+                'usuario_remetente_id'    => Auth::id(),                 // dono que removeu
+                'usuario_destinatario_id' => $userId,                    // removido
+                'veiculo_id'              => $veiculo->veiculo_id,
+                'frota_id'                => null,
+                'tipo'                    => Notificacao::TIPO_AVISO_INTERNO,    // ou 3, conforme teu enum
+                'status'                  => Notificacao::STATUS_PENDENTE,
+                'mensagem'                => 'Você foi removido como responsável do veículo: ' . $veiculo->modelo,
+                'data_envio'              => now(),
+            ]);
+        }
+
+        // 🔹 Adiciona novos responsáveis
+        foreach ($novos as $userId) {
+            // Evita recriar convite se já tiver pendente
+            $jaConvidado = Notificacao::where('veiculo_id', $veiculo->veiculo_id)
+                ->where('tipo', Notificacao::TIPO_CONVITE_VEICULO)
+                ->where('usuario_destinatario_id', $userId)
+                ->where('status', Notificacao::STATUS_PENDENTE)
+                ->exists();
+
+            if (!$jaConvidado) {
+                Notificacao::create([
+                    'usuario_remetente_id'    => Auth::id(),
+                    'usuario_destinatario_id' => $userId,
+                    'veiculo_id'              => $veiculo->veiculo_id,
+                    'frota_id'                => null,
+                    'tipo'                    => Notificacao::TIPO_CONVITE_VEICULO,
+                    'status'                  => Notificacao::STATUS_PENDENTE,
+                    'data_envio'              => now(),
+                ]);
+            }
+        }
     }
 }

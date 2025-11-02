@@ -20,18 +20,28 @@
         Você foi convidado para participar da frota:
         <span class="font-medium text-blue-800">{{ $notif->frota->nome ?? 'Desconhecida' }}</span>
 
-        {{-- Aviso interno (tipo 3) --}}
+        {{-- Avisos de sistema (tipo 3) - inclui frota e veículo removido --}}
         @elseif($notif->tipo == 3)
         ⚠️ <span class="font-semibold text-yellow-700">Aviso de sistema</span><br>
 
         @php
-        $remetente = $notif->remetente ? $notif->remetente->name : 'Um usuário';
-        $frotaNome = $notif->frota ? $notif->frota->nome : null;
+            $remetente = $notif->remetente ? $notif->remetente->name : 'Um usuário';
+            $frotaNome = $notif->frota?->nome;
+            $veiculoNome = $notif->veiculo?->modelo;
         @endphp
 
+        {{-- Se veio de frota --}}
         @if($frotaNome)
         O usuário <span class="font-semibold text-blue-800">{{ $remetente }}</span>
         deixou a frota <span class="font-semibold text-blue-800">{{ $frotaNome }}</span>.
+
+        {{-- Se veio de veículo --}}
+        @elseif($veiculoNome)
+        Você foi removido como responsável do veículo
+        <span class="font-semibold text-blue-800">{{ $veiculoNome }}</span>
+        por <span class="font-semibold text-blue-800">{{ $remetente }}</span>.
+
+        {{-- Caso genérico --}}
         @else
         Nova notificação recebida.
         @endif
@@ -78,7 +88,7 @@
             </button>
         </form>
 
-        {{-- Avisos internos (tipo 3) --}}
+        {{-- Avisos de sistema (tipo 3) --}}
         @elseif($notif->status == 0 && $notif->tipo == 3)
         <form method="POST" action="{{ route('notificacao.lida', $notif->notcodigo) }}">
             @csrf
