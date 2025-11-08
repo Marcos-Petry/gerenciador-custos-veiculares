@@ -102,12 +102,19 @@ class VeiculoController extends Controller
             ->orderByDesc('data_resposta')
             ->get();
 
-        // Novo: checa se veio da frota
-        $fromFrota = $request->query('from_frota'); // Ex: ?from_frota=3
+        // 🔹 Detecta se veio da tela de frota ou da consulta pública
+        $fromFrota = $request->query('from_frota');        // Ex: ?from_frota=3
+        $fromPublico = $request->boolean('from_publico');  // Ex: ?from_publico=1
 
-        return view('veiculo.show', compact('veiculo', 'convitesPendentes', 'convitesRespondidos', 'fromFrota'));
+        // Envia tudo pra view
+        return view('veiculo.show', compact(
+            'veiculo',
+            'convitesPendentes',
+            'convitesRespondidos',
+            'fromFrota',
+            'fromPublico'
+        ));
     }
-
 
     public function edit(Request $request, Veiculo $veiculo)
     {

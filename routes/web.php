@@ -86,6 +86,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/notificacao/avisos', [NotificacaoController::class, 'avisos'])
         ->name('notificacao.avisos');
+
+    // Páginas institucionais
+    Route::view('/politica-de-privacidade', 'institucional.privacidade')->name('privacidade');
+    Route::view('/termos-de-uso', 'institucional.termos')->name('termos');
+    Route::view('/contato', 'institucional.contato')->name('contato');
 });
 
 require __DIR__ . '/auth.php';

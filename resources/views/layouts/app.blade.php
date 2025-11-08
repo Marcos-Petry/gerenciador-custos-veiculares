@@ -33,9 +33,9 @@
             <div class="container mx-auto text-center text-sm text-gray-600">
                 <p>© {{ date('Y') }} GestoCar</p>
                 <div class="mt-2 flex justify-center gap-4">
-                    <a href="#" class="hover:text-blue-600">Política de Privacidade</a>
-                    <a href="#" class="hover:text-blue-600">Termos de Uso</a>
-                    <a href="#" class="hover:text-blue-600">Contato</a>
+                    <a href="{{ route('privacidade') }}" class="hover:text-blue-600">Política de Privacidade</a>
+                    <a href="{{ route('termos') }}" class="hover:text-blue-600">Termos de Uso</a>
+                    <a href="{{ route('contato') }}" class="hover:text-blue-600">Contato</a>
                 </div>
             </div>
         </footer>

@@ -106,19 +106,28 @@
         </div>
     </div>
 
-    {{-- Voltar --}}
-    @php
-        $fromFrota = request('from_frota');
-        $backUrl = $fromFrota
-            ? route('frota.veiculos.index', $fromFrota)
-            : route('veiculo.index');
-        $backLabel = $fromFrota ? '← Voltar à Veículos' : '← Voltar para Veículos';
-    @endphp
+{{-- Voltar --}}
+@php
+    $fromFrota = request('from_frota');
+    $fromPublico = request()->boolean('from_publico');
 
-    <div class="flex justify-start mt-8">
-        <a href="{{ $backUrl }}" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition text-sm sm:text-base">
-            {{ $backLabel }}
-        </a>
-    </div>
+    if ($fromPublico) {
+        $backUrl = route('publico.index');
+        $backLabel = '← Voltar para Consulta Pública';
+    } elseif ($fromFrota) {
+        $backUrl = route('frota.veiculos.index', $fromFrota);
+        $backLabel = '← Voltar à Frota';
+    } else {
+        $backUrl = route('veiculo.index');
+        $backLabel = '← Voltar para Veículos';
+    }
+@endphp
+
+<div class="flex justify-start mt-8">
+    <a href="{{ $backUrl }}"
+       class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition text-sm sm:text-base">
+        {{ $backLabel }}
+    </a>
 </div>
+
 @endsection

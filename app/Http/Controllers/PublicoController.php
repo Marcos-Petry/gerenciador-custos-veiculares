@@ -61,7 +61,7 @@ class PublicoController extends Controller
                     f.nome as titulo,
                     NULL as placa,
                     NULL as ano,
-                    NULL as foto,
+                    f.foto as foto,  -- ✅ antes era NULL, agora puxa a foto real
                     f.visibilidade,
                     f.created_at,
                     NULL as frota_nome
@@ -114,8 +114,8 @@ class PublicoController extends Controller
     {
         $veiculoA = $request->query('veiculoA');
         $veiculoB = $request->query('veiculoB');
-        $comparar = $request->query('comparar', 'nao'); // padrão "nao"
-        $vencedor = null; // garante que sempre existe essa variável
+        $comparar = $request->query('comparar', 'nao');
+        $vencedor = null;
 
         $gastosA = 0;
         $gastosB = 0;
@@ -139,7 +139,7 @@ class PublicoController extends Controller
             ));
         }
 
-        // ===== A partir daqui segue a lógica da comparação =====
+        // ====== Cálculo dos gastos ======
         $gastosA = DB::table('gasto')
             ->where('veiculo_id', $dadosA->veiculo_id)
             ->sum('valor');
@@ -148,6 +148,7 @@ class PublicoController extends Controller
             ->where('veiculo_id', $dadosB->veiculo_id)
             ->sum('valor');
 
+        // ====== Totais por categoria ======
         $categoriasA = DB::table('gasto')
             ->select('categoria', DB::raw('SUM(valor) as total'))
             ->where('veiculo_id', $dadosA->veiculo_id)
@@ -168,11 +169,10 @@ class PublicoController extends Controller
                 return $item;
             });
 
-        // Determina o vencedor
+        // ====== Determina o vencedor ======
         if ($gastosA > $gastosB) $vencedor = 'A';
         elseif ($gastosB > $gastosA) $vencedor = 'B';
 
-        // Retorna com os resultados calculados
         return view('publico.comparar', compact(
             'dadosA',
             'dadosB',
@@ -185,4 +185,5 @@ class PublicoController extends Controller
             'vencedor'
         ));
     }
+
 }

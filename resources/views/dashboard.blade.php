@@ -37,7 +37,7 @@
         <a href="{{ route('publico.comparar') }}" class="bg-white rounded-2xl shadow-lg p-6 transform transition hover:shadow-2xl hover:-translate-y-2 hover:scale-105 hover:bg-gray-200">
             <div class="text-3xl mb-3">⚖️</div>
             <h2 class="font-semibold text-lg">Comparar Gastos</h2>
-            <p class="text-sm text-gray-600 mt-2">Compare gastos entre veículos e frotas.</p>
+            <p class="text-sm text-gray-600 mt-2">Compare gastos entre veículos.</p>
         </a>
     </div>
 

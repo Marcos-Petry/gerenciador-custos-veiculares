@@ -22,6 +22,11 @@ class Veiculo extends Model
         'visibilidade',
     ];
 
+    protected $casts = [
+        'visibilidade' => 'boolean',
+    ];
+
+    // 🔹 Relações
     public function frota()
     {
         return $this->belongsTo(Frota::class, 'frota_id', 'frota_id');
@@ -32,19 +37,6 @@ class Veiculo extends Model
         return $this->belongsTo(User::class, 'usuario_dono_id');
     }
 
-    public function getVisibilidade()
-    {
-        if ($this->frota) {
-            return $this->frota->visibilidadeTexto; // usa accessor da frota
-        }
-        return $this->visibilidadeTexto; // usa accessor do próprio veículo
-    }
-
-    public function getVisibilidadeTextoAttribute()
-    {
-        return $this->visibilidade == 1 ? 'Público' : 'Privado';
-    }
-
     public function responsavel()
     {
         return $this->belongsToMany(User::class, 'responsavelveiculo', 'veiculo_id', 'usucodigo')
@@ -52,8 +44,29 @@ class Veiculo extends Model
     }
 
     public function gastos()
-{
-    return $this->hasMany(Gasto::class, 'veiculo_id');
-}
+    {
+        return $this->hasMany(Gasto::class, 'veiculo_id');
+    }
 
+    // 🔹 Accessors
+    public function getVisibilidade()
+    {
+        // Usa a visibilidade do próprio veículo se existir
+        if (!is_null($this->visibilidade)) {
+            return $this->visibilidadeTexto;
+        }
+
+        // Caso contrário, tenta herdar da frota
+        if ($this->frota) {
+            return $this->frota->visibilidadeTexto;
+        }
+
+        // Valor padrão
+        return 'Privado';
+    }
+
+    public function getVisibilidadeTextoAttribute()
+    {
+        return $this->visibilidade ? 'Público' : 'Privado';
+    }
 }
