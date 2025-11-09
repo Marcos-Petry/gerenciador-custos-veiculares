@@ -24,16 +24,18 @@
 @section('content')
 {{-- HERO --}}
 <section class="relative overflow-hidden bg-gradient-to-b from-blue-900 to-white border-b">
-  <div class="min-h-[calc(100vh-72px)] flex items-center
-              max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-    <div>
-      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight">
-        Controle completo dos <span class="text-indigo-600">gastos veiculares</span>
+  <div class="min-h-[calc(100vh-72px)] flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+    {{-- 🔹 Texto principal --}}
+    <div class="w-full lg:w-1/2 text-center lg:text-left mt-6 lg:mt-0">
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight text-white lg:text-black">
+        Controle completo dos <span class="text-indigo-400 lg:text-indigo-600">gastos veiculares</span>
       </h1>
-      <p class="mt-4 text-lg text-gray-700">
+      <p class="mt-4 text-base sm:text-lg text-gray-200 lg:text-gray-700">
         Simplifique o controle financeiro e promova uma gestão colaborativa eficiente.
       </p>
-      <div class="mt-8 flex flex-wrap gap-3">
+
+      <div class="mt-8 flex flex-wrap justify-center lg:justify-start gap-3">
         <a href="{{ route('register') }}"
           class="inline-flex items-center px-5 py-3 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700">
           Começar agora
@@ -44,16 +46,16 @@
         </a>
       </div>
 
-      {{-- Nav de âncoras --}}
-      <nav class="mt-6 flex flex-wrap gap-4 text-sm text-gray-600">
+      <nav class="mt-6 flex flex-wrap justify-center lg:justify-start gap-4 text-sm text-gray-300 lg:text-gray-600">
         <a href="#como-funciona" class="hover:text-gray-900">Como funciona</a>
         <span class="text-gray-400">•</span>
         <a href="#sobre-nos" class="hover:text-gray-900">Sobre nós</a>
       </nav>
     </div>
 
-    {{-- Cards à direita --}}
-    <div class="bg-white border rounded-2xl p-6 shadow-sm">
+    {{-- 🔹 Cards --}}
+    <div class="w-full lg:w-1/2 bg-white border rounded-2xl p-6 shadow-sm mt-10 lg:mt-0 max-w-md lg:max-w-none mx-auto lg:mx-0
+                flex-grow flex items-center justify-center lg:justify-end">
       <dl class="grid sm:grid-cols-2 gap-6">
         <div>
           <dt class="text-sm text-gray-500">Gerencie</dt>
