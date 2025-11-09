@@ -9,32 +9,32 @@
     </h1>
 
     <!-- Grid de Acesso Rápido -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
-        <a href="{{ route('veiculo.index') }}" class="bg-white rounded-2xl shadow-lg p-6 transform transition hover:shadow-2xl hover:-translate-y-2 hover:scale-105 hover:bg-gray-200">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 mb-10">
+        <a href="{{ route('veiculo.index') }}" class="bg-white rounded-xl shadow-md p-4 sm:p-5 transform transition hover:shadow-xl hover:-translate-y-1 hover:scale-105 hover:bg-gray-100">
             <div class="text-3xl mb-3">🚗</div>
             <h2 class="font-semibold text-lg">Veículos</h2>
             <p class="text-sm text-gray-600 mt-2">Gerencie seus veículos.</p>
         </a>
 
-        <a href="{{ route('frota.index') }}" class="bg-white rounded-2xl shadow-lg p-6 transform transition hover:shadow-2xl hover:-translate-y-2 hover:scale-105 hover:bg-gray-200">
+        <a href="{{ route('frota.index') }}" class="bg-white rounded-xl shadow-md p-4 sm:p-5 transform transition hover:shadow-xl hover:-translate-y-1 hover:scale-105 hover:bg-gray-100">
             <div class="text-3xl mb-3">🚌</div>
             <h2 class="font-semibold text-lg">Frotas</h2>
             <p class="text-sm text-gray-600 mt-2">Organize grupos de veículos.</p>
         </a>
 
-        <a href="{{ route('gastos.index') }}" class="bg-white rounded-2xl shadow-lg p-6 transform transition hover:shadow-2xl hover:-translate-y-2 hover:scale-105 hover:bg-gray-200">
+        <a href="{{ route('gastos.index') }}" class="bg-white rounded-xl shadow-md p-4 sm:p-5 transform transition hover:shadow-xl hover:-translate-y-1 hover:scale-105 hover:bg-gray-100">
             <div class="text-3xl mb-3">💰</div>
             <h2 class="font-semibold text-lg">Gastos</h2>
             <p class="text-sm text-gray-600 mt-2">Registre e acompanhe todas as despesas.</p>
         </a>
 
-        <a href="{{ route('publico.index') }}" class="bg-white rounded-2xl shadow-lg p-6 transform transition hover:shadow-2xl hover:-translate-y-2 hover:scale-105 hover:bg-gray-200">
+        <a href="{{ route('publico.index') }}" class="bg-white rounded-xl shadow-md p-4 sm:p-5 transform transition hover:shadow-xl hover:-translate-y-1 hover:scale-105 hover:bg-gray-100">
             <div class="text-3xl mb-3">🔎</div>
             <h2 class="font-semibold text-lg">Consulta Pública</h2>
             <p class="text-sm text-gray-600 mt-2">Visualize veículos e frotas públicos</p>
         </a>
 
-        <a href="{{ route('publico.comparar') }}" class="bg-white rounded-2xl shadow-lg p-6 transform transition hover:shadow-2xl hover:-translate-y-2 hover:scale-105 hover:bg-gray-200">
+        <a href="{{ route('publico.comparar') }}" class="bg-white rounded-xl shadow-md p-4 sm:p-5 transform transition hover:shadow-xl hover:-translate-y-1 hover:scale-105 hover:bg-gray-100">
             <div class="text-3xl mb-3">⚖️</div>
             <h2 class="font-semibold text-lg">Comparar Gastos</h2>
             <p class="text-sm text-gray-600 mt-2">Compare gastos entre veículos.</p>
