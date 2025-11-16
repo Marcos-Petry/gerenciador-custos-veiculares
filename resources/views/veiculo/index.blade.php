@@ -102,7 +102,9 @@
     </div>
 
     @if($origemCampoExterno)
-    <form id="form-selecao-veiculos" method="GET" action="{{ route('frota.create') }}">
+    <form id="form-selecao-veiculos" method="GET"
+      action="{{ request('frota_id') ? route('frota.edit', request('frota_id')) : route('frota.create') }}">
+
         @foreach(request()->except(['_token','origemCampoExterno']) as $key => $value)
             @if(is_array($value))
                 @foreach($value as $v)
@@ -144,7 +146,7 @@
                     <span class="ml-2 text-sm text-gray-600">Selecionar</span>
                 </div>
                 @else
-                <div class="flex justify-center mt-5 gap-6 border-t pt-3 text-sm font-medium">
+                <div class="flex flex-wrap justify-center mt-5 gap-x-6 gap-y-2 border-t pt-3 text-sm font-medium">
                     <a href="{{ route('veiculo.show', $veiculo) }}" class="flex items-center text-blue-600 hover:text-blue-800 transition gap-1">👁 <span>Visualizar</span></a>
 
                     @if($veiculo->usuario_dono_id === Auth::id())
@@ -167,13 +169,112 @@
     </div>
     </form>
 
-    <!-- Paginação -->
-    <div class="mt-6 flex flex-col sm:flex-row justify-between items-center text-sm text-gray-700 gap-2">
-        <div class="bg-white/40 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/30 shadow-sm">
-            Página <strong>{{ $veiculos->currentPage() }}</strong> de <strong>{{ $veiculos->lastPage() }}</strong> — <strong>{{ $veiculos->total() }}</strong> registros
+<!-- Paginação -->
+<div class="mt-6 text-sm text-gray-700">
+
+    {{-- 📌 Mobile (até 640px) --}}
+    <div class="flex flex-col items-center gap-3 sm:hidden">
+
+        <div class="bg-white/40 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/30 shadow-sm text-center">
+            Página <strong>{{ $veiculos->currentPage() }}</strong>
+            de <strong>{{ $veiculos->lastPage() }}</strong> —
+            <strong>{{ $veiculos->total() }}</strong> registros
         </div>
-        <div>{{ $veiculos->onEachSide(1)->links() }}</div>
+
+        <div class="w-full flex justify-center overflow-x-auto">
+            <div class="inline-flex gap-1 px-2 pb-1">
+
+                {{-- Anterior --}}
+                @if ($veiculos->onFirstPage())
+                    <span class="px-3 py-1 rounded-lg border border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed">
+                        «
+                    </span>
+                @else
+                    <a href="{{ $veiculos->previousPageUrl() }}"
+                       class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-50">
+                        «
+                    </a>
+                @endif
+
+                {{-- Páginas compactas --}}
+                @php
+                    $total   = $veiculos->lastPage();
+                    $current = $veiculos->currentPage();
+                    $range   = 2;
+                    $inicio  = max(1, $current - $range);
+                    $fim     = min($total, $current + $range);
+                @endphp
+
+                {{-- Primeira página --}}
+                @if ($inicio > 1)
+                    <a href="{{ $veiculos->url(1) }}" class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-50">
+                        1
+                    </a>
+
+                    @if ($inicio > 2)
+                        <span class="px-3 py-1">…</span>
+                    @endif
+                @endif
+
+                {{-- Intervalo central --}}
+                @for ($i = $inicio; $i <= $fim; $i++)
+                    @if ($i == $current)
+                        <span class="px-3 py-1 rounded-lg border border-blue-500 bg-blue-500 text-white font-semibold">
+                            {{ $i }}
+                        </span>
+                    @else
+                        <a href="{{ $veiculos->url($i) }}"
+                           class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-50">
+                            {{ $i }}
+                        </a>
+                    @endif
+                @endfor
+
+                {{-- Última página --}}
+                @if ($fim < $total)
+                    @if ($fim < $total - 1)
+                        <span class="px-3 py-1">…</span>
+                    @endif
+
+                    <a href="{{ $veiculos->url($total) }}"
+                       class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-50">
+                        {{ $total }}
+                    </a>
+                @endif
+
+                {{-- Próxima --}}
+                @if ($veiculos->hasMorePages())
+                    <a href="{{ $veiculos->nextPageUrl() }}"
+                       class="px-3 py-1 rounded-lg border border-gray-300 bg-white hover:bg-gray-50">
+                        »
+                    </a>
+                @else
+                    <span class="px-3 py-1 rounded-lg border border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed">
+                        »
+                    </span>
+                @endif
+
+            </div>
+        </div>
+
     </div>
+
+    {{-- 📌 Desktop (a partir de 640px) --}}
+    <div class="hidden sm:flex justify-between items-center">
+
+        <div class="bg-white/40 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/30 shadow-sm">
+            Página <strong>{{ $veiculos->currentPage() }}</strong>
+            de <strong>{{ $veiculos->lastPage() }}</strong> —
+            <strong>{{ $veiculos->total() }}</strong> registros
+        </div>
+
+        <div>
+            {{ $veiculos->onEachSide(1)->links() }}
+        </div>
+
+    </div>
+
+</div>
 
 </div>
 

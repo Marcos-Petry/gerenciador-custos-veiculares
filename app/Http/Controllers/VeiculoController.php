@@ -11,26 +11,119 @@ use Illuminate\Validation\Rule;
 
 class VeiculoController extends Controller
 {
-    public function index(Request $request)
-    {
-        $user = Auth::user();
+public function index(Request $request)
+{
+    $user = Auth::user();
 
-        $veiculos = Veiculo::with('frota')
-            ->where(function ($query) use ($user) {
-                $query->where('usuario_dono_id', $user->id)
-                    ->orWhereHas('responsavel', fn($q) => $q->where('usucodigo', $user->id))
-                    ->orWhereHas('frota.responsavel', fn($q) => $q->where('usucodigo', $user->id));
-            })
-            ->orderBy('modelo')
-            ->paginate(6);
+    // ==========================
+    // BASE DA QUERY
+    // ==========================
+    $query = Veiculo::with('frota')
+        ->where(function ($q) use ($user) {
+            $q->where('usuario_dono_id', $user->id)
+              ->orWhereHas('responsavel', fn($r) => $r->where('usucodigo', $user->id))
+              ->orWhereHas('frota.responsavel', fn($r) => $r->where('usucodigo', $user->id));
+        });
 
-        $origemCampoExterno = $request->boolean('origemCampoExterno', false);
+    // ==========================
+    // FILTROS DINÂMICOS
+    // ==========================
+    $campos     = $request->campo     ?? [];
+    $operadores = $request->operador  ?? [];
+    $valores    = $request->valor     ?? [];
+    $valorDe    = $request->valor_de  ?? [];
+    $valorAte   = $request->valor_ate ?? [];
 
-        // 🔹 Identifica se o usuário é somente responsável (sem ser dono de nenhum veículo)
-        $modoSomenteVisualizacao = !$veiculos->contains('usuario_dono_id', $user->id);
+    foreach ($campos as $i => $campo) {
 
-        return view('veiculo.index', compact('veiculos', 'origemCampoExterno', 'modoSomenteVisualizacao'));
+        $op = $operadores[$i] ?? null;
+        $valor = $valores[$i] ?? null;
+
+        if (!$campo || !$op) continue;
+
+        switch ($campo) {
+
+            // --------------------
+            // MODELO
+            // --------------------
+            case 'modelo':
+                if ($op == '=')      $query->where('modelo', $valor);
+                if ($op == 'like')   $query->where('modelo', 'LIKE', "%$valor%");
+                if ($op == 'starts') $query->where('modelo', 'LIKE', "$valor%");
+                if ($op == 'ends')   $query->where('modelo', 'LIKE', "%$valor");
+                break;
+
+            // --------------------
+            // PLACA
+            // --------------------
+            case 'placa':
+                if ($op == '=')    $query->where('placa', $valor);
+                if ($op == 'like') $query->where('placa', 'LIKE', "%$valor%");
+                break;
+
+            // --------------------
+            // ANO
+            // --------------------
+            case 'ano':
+                if ($op == '=')    $query->where('ano', $valor);
+                if ($op == '>')    $query->where('ano', '>', $valor);
+                if ($op == '<')    $query->where('ano', '<', $valor);
+
+                if ($op == 'between') {
+                    $de  = $valorDe[$i]  ?? null;
+                    $ate = $valorAte[$i] ?? null;
+
+                    if ($de !== null && $ate !== null) {
+                        $query->whereBetween('ano', [$de, $ate]);
+                    }
+                }
+                break;
+
+            // --------------------
+            // VISIBILIDADE (0/1)
+            // --------------------
+            case 'visibilidade':
+                if ($valor !== null && $valor !== '') {
+                    $query->where('visibilidade', $valor);
+                }
+                break;
+
+            // --------------------
+            // VÍNCULO
+            // --------------------
+            case 'vinculo':
+
+                if ($valor === 'dono') {
+                    $query->where('usuario_dono_id', $user->id);
+                }
+
+                if ($valor === 'responsavel') {
+                    $query->whereHas('responsavel', function ($r) use ($user) {
+                        $r->where('usucodigo', $user->id);
+                    });
+                }
+
+                break;
+        }
     }
+
+    // ==========================
+    // PAGINAÇÃO + ORDEM
+    // ==========================
+    $veiculos = $query
+        ->orderBy('modelo')
+        ->paginate(6)
+        ->appends($request->query()); // mantém filtros na URL
+
+    // ==========================
+    // OUTRAS VARIÁVEIS DA VIEW
+    // ==========================
+    $origemCampoExterno = $request->boolean('origemCampoExterno', false);
+    $modoSomenteVisualizacao = !$veiculos->contains('usuario_dono_id', $user->id);
+
+    return view('veiculo.index', compact('veiculos', 'origemCampoExterno', 'modoSomenteVisualizacao'));
+}
+
 
 
 

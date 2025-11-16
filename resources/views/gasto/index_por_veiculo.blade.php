@@ -115,7 +115,8 @@
     </form>
 
     <!-- 🔹 Ações -->
-    <div class="flex flex-wrap gap-2 mb-4">
+    <div class="flex flex-wrap gap-2 mb-4 mt-4 sm:mt-0">
+
         <a href="{{ route('veiculo.gastos.create', $veiculo->veiculo_id) }}"
            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
            ➕ Incluir
@@ -131,46 +132,150 @@
         </a>
     </div>
 
-    <!-- 🔹 Tabela -->
-    <div class="bg-white rounded-2xl shadow overflow-hidden">
-        <table class="min-w-full border-collapse">
+<!-- 🔹 Tabela -->
+<div class="bg-white rounded-2xl shadow overflow-hidden">
+    <div class="overflow-x-auto max-sm:overflow-x-scroll">
+        <div class="overflow-x-auto max-w-full">
+        <table class="border-collapse text-sm max-sm:text-xs w-max sm:w-full">
             <thead>
                 <tr class="bg-gray-100">
-                    <th class="px-6 py-3 text-left font-semibold">Categoria</th>
-                    <th class="px-6 py-3 text-left font-semibold">Descrição</th>
-                    <th class="px-6 py-3 text-left font-semibold">Valor</th>
-                    <th class="px-6 py-3 text-left font-semibold">Data</th>
-                    <th class="px-6 py-3 text-left font-semibold">Incluído por</th>
-                    <th class="px-4 py-3 text-center font-semibold w-16">Anexos</th>
+                    <th class="px-6 py-3 max-sm:px-2 max-sm:py-2 text-left font-semibold">Categoria</th>
+                    <th class="px-6 py-3 max-sm:px-2 max-sm:py-2 text-left font-semibold">Descrição</th>
+                    <th class="px-6 py-3 max-sm:px-2 max-sm:py-2 text-left font-semibold">Valor</th>
+                    <th class="px-6 py-3 max-sm:px-2 max-sm:py-2 text-left font-semibold">Data</th>
+                    <th class="px-6 py-3 max-sm:px-2 max-sm:py-2 text-left font-semibold">Incluído por</th>
+                    <th class="px-4 py-3 max-sm:px-1 max-sm:py-2 text-center font-semibold w-16">Anexos</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($gastos as $gasto)
-                <tr class="linha-gasto border-t hover:bg-gray-50 transition cursor-pointer"
+                @foreach($gastos as $gasto)
+                <tr class="linha-gasto border-t hover:bg-gray-50 transition cursor-pointer max-sm:text-xs"
                     data-id="{{ $gasto->gasto_id }}">
-                    <td class="px-6 py-3">{{ $gasto->categoriaTexto() }}</td>
-                    <td class="px-6 py-3">{{ $gasto->descricao ?? '—' }}</td>
-                    <td class="px-6 py-3">R$ {{ number_format($gasto->valor, 2, ',', '.') }}</td>
-                    <td class="px-6 py-3">{{ \Carbon\Carbon::parse($gasto->data_gasto)->format('d/m/Y') }}</td>
-                    <td class="px-6 py-3">{{ $gasto->usuario->name ?? 'Desconhecido' }}</td>
-                    <td class="px-4 py-3 text-center">@if($gasto->anexos->count() > 0)📎@endif</td>
+                    <td class="px-6 py-3 max-sm:px-2 max-sm:py-2">{{ $gasto->categoriaTexto() }}</td>
+                    <td class="px-6 py-3 max-sm:px-2 max-sm:py-2">{{ $gasto->descricao ?? '—' }}</td>
+                    <td class="px-6 py-3 max-sm:px-2 max-sm:py-2">
+                        R$ {{ number_format($gasto->valor, 2, ',', '.') }}
+                    </td>
+                    <td class="px-6 py-3 max-sm:px-2 max-sm:py-2">
+                        {{ \Carbon\Carbon::parse($gasto->data_gasto)->format('d/m/Y') }}
+                    </td>
+                    <td class="px-6 py-3 max-sm:px-2 max-sm:py-2">{{ $gasto->usuario->name ?? '—' }}</td>
+                    <td class="px-4 py-3 max-sm:px-1 max-sm:py-2 text-center">
+                        @if($gasto->anexos->count() > 0) 📎 @endif
+                    </td>
                 </tr>
-                @empty
-                <tr>
-                    <td colspan="6" class="text-center py-4 text-gray-500">Nenhum gasto encontrado.</td>
-                </tr>
-                @endforelse
+                @endforeach
             </tbody>
         </table>
     </div>
-
-    <!-- Paginação -->
-    <div class="mt-6 flex flex-col sm:flex-row justify-between items-center text-sm text-gray-700 gap-2">
-        <div class="bg-white/40 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/30 shadow-sm">
-            Exibindo <strong>{{ $gastos->count() }}</strong> de <strong>{{ $gastos->total() }}</strong> registros
-        </div>
-        <div>{{ $gastos->onEachSide(1)->links() }}</div>
     </div>
+</div>
+
+<!-- Paginação -->
+<div class="mt-6 text-sm text-gray-700">
+
+    {{-- 📌 Mobile (até 640px) --}}
+    <div class="flex flex-col items-center gap-3 sm:hidden">
+
+        <div class="bg-white/40 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/30 shadow-sm text-center">
+            Página <strong>{{ $gastos->currentPage() }}</strong>
+            de <strong>{{ $gastos->lastPage() }}</strong> —
+            <strong>{{ $gastos->total() }}</strong> registros
+        </div>
+
+        <div class="w-full flex justify-center overflow-x-auto">
+            <div class="inline-flex gap-1 px-2 pb-1">
+
+                {{-- Anterior --}}
+                @if ($gastos->onFirstPage())
+                    <span class="px-3 py-1 rounded-lg border border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed">
+                        «
+                    </span>
+                @else
+                    <a href="{{ $gastos->previousPageUrl() }}"
+                       class="px-3 py-1 rounded-lg border border-gray-300 bg-white hover:bg-gray-50">
+                        «
+                    </a>
+                @endif
+
+                {{-- Páginas compactas com ellipsis --}}
+                @php
+                    $total   = $gastos->lastPage();
+                    $current = $gastos->currentPage();
+                    $range   = 2;
+                    $inicio  = max(1, $current - $range);
+                    $fim     = min($total, $current + $range);
+                @endphp
+
+                {{-- Primeira página --}}
+                @if ($inicio > 1)
+                    <a href="{{ $gastos->url(1) }}"
+                       class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-50">1</a>
+
+                    @if ($inicio > 2)
+                        <span class="px-3 py-1">…</span>
+                    @endif
+                @endif
+
+                {{-- Intervalo central --}}
+                @for ($i = $inicio; $i <= $fim; $i++)
+                    @if ($i == $current)
+                        <span class="px-3 py-1 rounded-lg border border-blue-500 bg-blue-500 text-white font-semibold">
+                            {{ $i }}
+                        </span>
+                    @else
+                        <a href="{{ $gastos->url($i) }}"
+                           class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-50">
+                            {{ $i }}
+                        </a>
+                    @endif
+                @endfor
+
+                {{-- Última página --}}
+                @if ($fim < $total)
+                    @if ($fim < $total - 1)
+                        <span class="px-3 py-1">…</span>
+                    @endif
+
+                    <a href="{{ $gastos->url($total) }}"
+                       class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-50">
+                        {{ $total }}
+                    </a>
+                @endif
+
+                {{-- Próxima --}}
+                @if ($gastos->hasMorePages())
+                    <a href="{{ $gastos->nextPageUrl() }}"
+                       class="px-3 py-1 rounded-lg border border-gray-300 bg-white hover:bg-gray-50">
+                        »
+                    </a>
+                @else
+                    <span class="px-3 py-1 rounded-lg border border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed">
+                        »
+                    </span>
+                @endif
+
+            </div>
+        </div>
+
+    </div>
+
+    {{-- 📌 Desktop (a partir de 640px) --}}
+    <div class="hidden sm:flex justify-between items-center">
+
+        <div class="bg-white/40 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/30 shadow-sm">
+            Página <strong>{{ $gastos->currentPage() }}</strong>
+            de <strong>{{ $gastos->lastPage() }}</strong> —
+            <strong>{{ $gastos->total() }}</strong> registros
+        </div>
+
+        <div>
+            {{ $gastos->onEachSide(1)->links() }}
+        </div>
+
+    </div>
+
+</div>
 </div>
 
 <!-- Script -->

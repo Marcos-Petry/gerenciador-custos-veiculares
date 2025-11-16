@@ -210,35 +210,69 @@ $total = $gastos->count();
         }
     }
 
-    /* ===== RESPONSIVO ===== */
-    @media (max-width: 768px) {
-        .timeline__line {
-            left: 1rem;
-            transform: none;
-        }
+@media (max-width: 768px) {
 
-        .timeline__item {
-            grid-template-columns: 32px 1fr;
-            row-gap: .75rem;
-        }
-
-        .timeline__card {
-            grid-column: 2;
-            width: 100%;
-            text-align: left !important;
-            justify-self: stretch !important;
-            margin: 0 !important;
-        }
-
-        .timeline__dot {
-            position: static;
-            transform: none;
-            margin-top: .5rem;
-        }
-
-        .timeline__item::before {
-            display: none;
-        }
+    .timeline__line {
+        left: 50%;
+        transform: translateX(-50%);
+        width: 3px;
     }
+
+    .timeline__item {
+        grid-template-columns: 1fr 40px 1fr;
+        row-gap: 4.5rem !important; /* mais espaço vertical */
+        position: relative;
+    }
+
+    .timeline__dot {
+        position: absolute !important;
+        left: 50% !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%) !important;
+
+        height: 22px !important;
+        width: 22px !important;
+        font-size: 0.68rem !important;
+
+        z-index: 9999;
+    }
+
+    /* ======== CARD REDUZIDO AINDA MAIS ======== */
+    .timeline__card {
+        width: 8.8rem !important;     /* menor */
+        padding: 0.48rem !important;  /* mais compacto */
+        font-size: 0.72rem !important;
+        border-radius: 0.60rem !important;
+
+        min-height: 85px !important;
+    }
+
+    .timeline__card span,
+    .timeline__card p {
+        font-size: 0.70rem !important;
+        line-height: 1rem !important;
+    }
+
+    /* ======== MAIS AFASTADO DA LINHA ======== */
+    
+    /* Esquerda */
+    .timeline__item:nth-last-child(odd) .timeline__card {
+        grid-column: 1;
+        margin-right: 3.4rem !important; /* ERA 2.9 → agora 3.4 */
+    }
+
+    /* Direita */
+    .timeline__item:nth-last-child(even) .timeline__card {
+        grid-column: 3;
+        margin-left: 3.4rem !important; /* idem */
+    }
+
+    .timeline__item::before {
+        display: none !important;
+    }
+}
+
+
+
 </style>
 @endsection
