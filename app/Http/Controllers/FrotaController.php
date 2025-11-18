@@ -11,37 +11,35 @@ use Illuminate\Support\Facades\Storage;
 
 class FrotaController extends Controller
 {
-    public function index(Request $request)
-    {
-        $user = Auth::user();
+   public function index(Request $request)
+{
+    $user = Auth::user();
 
-        // 🔹 Consulta: frotas em que o usuário é dono ou responsável
-        $frotasQuery = Frota::with('veiculos', 'responsavel')
-            ->where('usuario_dono_id', $user->id)
-            ->orWhereHas('responsavel', fn($q) => $q->where('usucodigo', $user->id));
-
-        // 🔹 Paginação (mantém o ->paginate() pra usar onEachSide() na view)
-        $frotas = $frotasQuery->paginate(6);
-
-        // 🔹 Adiciona flags de controle para a view
-        $frotas->getCollection()->transform(function ($frota) use ($user) {
-            // Dono
-            $frota->ehDono = $frota->usuario_dono_id === $user->id;
-
-            // Responsável (segue o mesmo padrão do ehDono)
-            $frota->ehResponsavel = $frota->responsavel
-                ->contains('usucodigo', $user->usucodigo);
-
-            return $frota;
+    // 🔹 Agrupa dono + responsável em um único bloco
+    $frotasQuery = Frota::with('veiculos', 'responsavel')
+        ->where(function ($q) use ($user) {
+            $q->where('usuario_dono_id', $user->id)
+              ->orWhereHas('responsavel', fn($r) => $r->where('usucodigo', $user->usucodigo));
         });
 
-        // 🔹 Flag que indica se veio de seleção externa
-        $origemCampoExterno = $request->boolean('origemCampoExterno', false);
+    // 🔹 Aplica filtros dinâmicos (nome, descrição, visibilidade, vínculo)
+    $this->aplicarFiltrosFrotas($frotasQuery, $request, $user);
 
-        return view('frota.index', compact('frotas', 'origemCampoExterno'));
-    }
+    // 🔹 Paginação
+    $frotas = $frotasQuery->paginate(6);
 
+    // 🔹 Flags para a view (ehDono / ehResponsavel)
+    $frotas->getCollection()->transform(function ($frota) use ($user) {
+        $frota->ehDono = $frota->usuario_dono_id === $user->id;
+        $frota->ehResponsavel = $frota->responsavel
+            ->contains('usucodigo', $user->usucodigo);
+        return $frota;
+    });
 
+    $origemCampoExterno = $request->boolean('origemCampoExterno', false);
+
+    return view('frota.index', compact('frotas', 'origemCampoExterno'));
+}
 
     public function create(Request $request)
     {
@@ -265,4 +263,57 @@ class FrotaController extends Controller
             ->route('frota.index')
             ->with('success', 'Você saiu da responsabilidade desta frota. O dono foi notificado.');
     }
+
+private function aplicarFiltrosFrotas($query, Request $request, $user): void
+{
+    $campo    = $request->input('campo');
+    $operador = $request->input('operador');
+
+    // Valor depende do campo selecionado na tela
+    if ($campo === 'visibilidade') {
+        $valor = $request->input('valor_visibilidade');
+    } elseif ($campo === 'vinculo') {
+        $valor = $request->input('valor_vinculo');
+    } else {
+        $valor = $request->input('valor_texto');
+    }
+
+    if (!$campo || $valor === null || $valor === '') {
+        return;
+    }
+
+    switch ($campo) {
+
+        // 🔹 Nome / Descrição
+        case 'nome':
+        case 'descricao':
+            if ($operador === 'like') {
+                $query->where($campo, 'like', "%{$valor}%");
+            } elseif ($operador === 'starts') {
+                $query->where($campo, 'like', "{$valor}%");
+            } elseif ($operador === 'ends') {
+                $query->where($campo, 'like', "%{$valor}");
+            } else {
+                $query->where($campo, '=', $valor);
+            }
+            break;
+
+        // 🔹 Visibilidade
+        case 'visibilidade':
+            $query->where('visibilidade', $valor);
+            break;
+
+        // 🔹 Vínculo
+        case 'vinculo':
+            if ($valor === 'dono') {
+                $query->where('usuario_dono_id', $user->id);
+            } elseif ($valor === 'responsavel') {
+                $query->whereHas('responsavel', fn($q) =>
+                    $q->where('usucodigo', $user->usucodigo)
+                );
+            }
+            break;
+    }
+}
+
 }

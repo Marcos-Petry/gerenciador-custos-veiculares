@@ -120,24 +120,41 @@
 
         {{-- Botões centralizados --}}
         <div class="flex justify-center items-center gap-4 mt-6">
-            <a href="{{ route('frota.veiculos.index', $frota->frota_id) }}"
+            <a href="{{ route('frota.veiculos.index', ['frota' => $frota->frota_id,'from_publico' => request('from_publico')]) }}"
                 class="px-5 py-2.5 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition text-sm flex items-center gap-2">
                 🚗 Ver Veículos
             </a>
 
-            <a href="{{ route('frota.gasto.index', $frota->frota_id) }}"
-                class="px-5 py-2.5 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition text-sm flex items-center gap-2">
-                💰 Ver Gastos
-            </a>
+<a href="{{ route('frota.gasto.index', [
+        'frota' => $frota->frota_id,
+        'from_publico' => request('from_publico')
+    ]) }}"
+    class="px-5 py-2.5 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition text-sm flex items-center gap-2">
+    💰 Ver Gastos
+</a>
+
         </div>
     </div>
 
-    {{-- 🔙 Voltar --}}
-    <div class="flex justify-start mt-10">
-        <a href="{{ route('frota.index') }}"
-            class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition text-sm sm:text-base">
-            ← Voltar
-        </a>
-    </div>
+{{-- 🔙 Voltar --}}
+@php
+    $fromPublico = request()->boolean('from_publico');
+
+    if ($fromPublico) {
+        $backUrl = route('publico.index');
+        $backLabel = '← Voltar para Consulta Pública';
+    } else {
+        $backUrl = route('frota.index');
+        $backLabel = '← Voltar';
+    }
+@endphp
+
+<div class="flex justify-start mt-10">
+    <a href="{{ $backUrl }}"
+        class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition text-sm sm:text-base">
+        {{ $backLabel }}
+    </a>
+</div>
+
 </div>
 @endsection

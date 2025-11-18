@@ -15,52 +15,55 @@ class GastoController extends Controller
     {
         $user = Auth::user();
 
-        // 🔹 1. Carrega todas as frotas do usuário (dono ou responsável)
         $frotas = \App\Models\Frota::where('usuario_dono_id', $user->id)
             ->orWhereHas('responsavel', fn($q) => $q->where('usucodigo', $user->id))
             ->orderBy('nome')
             ->get();
 
-        // 🔹 2. Monta a consulta principal de gastos
-        $gastos = \App\Models\Gasto::with(['veiculo.frota', 'usuario'])
+        $gastos = Gasto::with(['veiculo.frota', 'usuario'])
             ->whereHas('veiculo', function ($q) use ($user) {
                 $q->where('usuario_dono_id', $user->id)
                     ->orWhereHas('responsavel', fn($r) => $r->where('users.id', $user->id))
                     ->orWhereHas('frota.responsavel', fn($r) => $r->where('usucodigo', $user->id));
-            })
-            // 🔹 Filtro por categoria
-            ->when($request->filled('categoria'), function ($q) use ($request) {
-                $q->where('categoria', $request->categoria);
-            })
-            // 🔹 Filtro dinâmico (campo + operador + valor)
-            ->when($request->filled('campo') && $request->filled('valor'), function ($q) use ($request) {
-                $campo = $request->campo;
-                $operador = $request->operador ?? '=';
-                $valor = $request->valor;
+            });
+        $gastos = $this->aplicarFiltros($gastos, $request, $user);
+            
+        $gastos = $gastos->orderBy('data_gasto', 'desc')->paginate(10);
 
-                if ($operador === 'like') {
-                    $q->where($campo, 'like', '%' . $valor . '%');
-                } else {
-                    $q->where($campo, $operador, $valor);
-                }
-            })
-            ->orderBy('data_gasto', 'desc')
-            ->paginate(10);
-
-        // 🔹 3. Retorna a view com ambos
         return view('gasto.index', compact('gastos', 'frotas'));
     }
 
 
-    public function indexPorVeiculo(Veiculo $veiculo)
-    {
-        $gastos = $veiculo->gastos()
-            ->with('usuario')
-            ->orderBy('data_gasto', 'desc')
-            ->paginate(10);
+public function indexPorVeiculo(Veiculo $veiculo, Request $request)
+{
+    // Base da query: todos os gastos do veículo
+    $gastos = $veiculo->gastos()
+        ->with(['usuario', 'veiculo.frota']);
 
-        return view('gasto.index_por_veiculo', compact('veiculo', 'gastos'));
+    // Categoria (select simples)
+    if ($request->filled('categoria')) {
+        $gastos->where('categoria', $request->categoria);
     }
+
+    // Filtro por anexos
+    if ($request->filled('anexoFiltro')) {
+        if ($request->anexoFiltro === 'com') {
+            $gastos->whereHas('anexos');
+        } elseif ($request->anexoFiltro === 'sem') {
+            $gastos->whereDoesntHave('anexos');
+        }
+    }
+
+    $this->aplicarFiltros($gastos, $request, Auth::user());
+
+    $gastos = $gastos
+        ->orderBy('data_gasto', 'desc')
+        ->paginate(10)
+        ->withQueryString();
+
+    return view('gasto.index_por_veiculo', compact('veiculo', 'gastos'));
+}
+
 
     public function create()
     {
@@ -218,50 +221,54 @@ class GastoController extends Controller
     public function indexPorFrota($frota_id, Request $request)
 {
     $user = Auth::user();
-    $frota = \App\Models\Frota::with('veiculos.gastos')->findOrFail($frota_id);
 
-    // 🔹 Base: todos os gastos da frota
+    // Carrega frota + veículos
+    $frota = \App\Models\Frota::with('veiculos')->findOrFail($frota_id);
+
+    // Base: todos os gastos dos veículos da frota
     $gastos = Gasto::with(['veiculo.frota', 'usuario'])
-        ->whereIn('veiculo_id', $frota->veiculos->pluck('veiculo_id'))
+        ->whereIn('veiculo_id', $frota->veiculos->pluck('veiculo_id'));
 
-        // 🔹 Filtro de vínculo (dono / responsável)
-        ->when($request->filled('vinculo'), function ($q) use ($request, $user) {
-            if ($request->vinculo === 'dono') {
-                $q->whereHas('veiculo', fn($v) => $v->where('usuario_dono_id', $user->id));
-            } elseif ($request->vinculo === 'responsavel') {
-                $q->whereHas('veiculo.responsavel', fn($r) => $r->where('users.id', $user->id));
-            }
-        })
+    /**
+     * ============================================================
+     * 🔥 Filtros específicos da tela de gastos por frota
+     * ============================================================
+     */
 
-        // Filtro por categoria
-        ->when($request->filled('categoria'), function ($q) use ($request) {
-            $q->where('categoria', $request->categoria);
-        })
+    // ➤ Filtro direto por categoria (select normal)
+    if ($request->filled('categoria')) {
+        $gastos->where('categoria', $request->categoria);
+    }
 
-        // Filtro dinâmico (campo, operador, valor)
-        ->when($request->filled('campo') && $request->filled('valor'), function ($q) use ($request) {
-            $campo = $request->campo;
-            $operador = $request->operador ?? '=';
-            $valor = $request->valor;
+    // ➤ Filtro direto por vínculo (dono / responsável)
+    if ($request->filled('vinculo')) {
+        if ($request->vinculo === 'dono') {
+            $gastos->whereHas('veiculo', fn($v) => 
+                $v->where('usuario_dono_id', $user->id)
+            );
+        } elseif ($request->vinculo === 'responsavel') {
+            $gastos->whereHas('veiculo.responsavel', fn($r) => 
+                $r->where('users.id', $user->id)
+            );
+        }
+    }
 
-            if ($operador === 'like') {
-                $q->where($campo, 'like', '%' . $valor . '%');
-            } else {
-                $q->where($campo, $operador, $valor);
-            }
-        })
+    /**
+     * ============================================================
+     * 🔥 Filtros dinâmicos padronizados (campo / operador / valor)
+     * ============================================================
+     */
+    $this->aplicarFiltros($gastos, $request, $user);
 
-        // Filtro por usuário (campo “Incluído por”)
-        ->when($request->filled('usuario'), function ($q) use ($request) {
-            $nome = $request->usuario;
-            $q->whereHas('usuario', fn($u) => $u->where('name', 'like', "%{$nome}%"));
-        })
-
+    // Finaliza
+    $gastos = $gastos
         ->orderBy('data_gasto', 'desc')
-        ->paginate(10);
+        ->paginate(10)
+        ->withQueryString();
 
     return view('gasto.index_por_frota', compact('frota', 'gastos'));
 }
+
 
 
     public function createPorFrota($frotaId)
@@ -294,4 +301,111 @@ class GastoController extends Controller
 
         return view('gasto.linha-tempo', compact('frota', 'gastos'));
     }
+
+    private function aplicarFiltros($query, Request $request, $user = null)
+{
+    // ------------------------------
+    // FILTRO — Valor (entre, >, <, =)
+    // ------------------------------
+    if ($request->campo === 'valor') {
+
+        if ($request->operador === 'between' && $request->filled('valor_de') && $request->filled('valor_ate')) {
+            $query->whereBetween('valor', [$request->valor_de, $request->valor_ate]);
+        }
+        elseif ($request->filled('valor')) {
+            $query->where('valor', $request->operador ?? '=', $request->valor);
+        }
+
+        return $query;
+    }
+
+    // ------------------------------
+    // FILTRO — Data do gasto
+    // ------------------------------
+    if ($request->campo === 'data_gasto') {
+
+        if ($request->operador === 'between' && $request->filled('valor_de') && $request->filled('valor_ate')) {
+            $query->whereBetween('data_gasto', [$request->valor_de, $request->valor_ate]);
+        }
+        elseif ($request->filled('valor')) {
+            $query->where('data_gasto', $request->operador ?? '=', $request->valor);
+        }
+
+        return $query;
+    }
+
+    // ------------------------------
+    // FILTRO — Descrição
+    // ------------------------------
+    if ($request->campo === 'descricao' && $request->filled('valor')) {
+        $query->where('descricao', 'like', "%{$request->valor}%");
+        return $query;
+    }
+
+    // ------------------------------
+    // FILTRO — Veículo (nome modelo)
+    // ------------------------------
+    if ($request->campo === 'veiculo' && $request->filled('valor')) {
+        $query->whereHas('veiculo', fn($v) => 
+            $v->where('modelo', 'like', "%{$request->valor}%")
+        );
+        return $query;
+    }
+
+    // ------------------------------
+    // FILTRO — Categoria
+    // ------------------------------
+    if ($request->campo === 'categoria' && $request->filled('categoriaFiltro')) {
+        $query->where('categoria', $request->categoriaFiltro);
+        return $query;
+    }
+
+    // ------------------------------
+    // FILTRO — Usuário
+    // ------------------------------
+    if ($request->campo === 'usuario' && $request->filled('usuarioFiltro')) {
+        $query->whereHas('usuario', fn($u) =>
+            $u->where('name', 'like', "%{$request->usuarioFiltro}%")
+        );
+        return $query;
+    }
+
+    // ------------------------------
+    // FILTRO — Vínculo (dono / responsável)
+    // ------------------------------
+    if ($request->campo === 'vinculo' && $request->filled('vinculoFiltro') && $user) {
+
+        if ($request->vinculoFiltro === 'dono') {
+            $query->whereHas('veiculo', fn($v) =>
+                $v->where('usuario_dono_id', $user->id)
+            );
+        }
+
+        if ($request->vinculoFiltro === 'responsavel') {
+            $query->whereHas('veiculo.responsavel', fn($r) =>
+                $r->where('users.id', $user->id)
+            );
+        }
+
+        return $query;
+    }
+
+    // ------------------------------
+    // FILTRO — Anexos
+    // ------------------------------
+    if ($request->campo === 'anexos' && $request->filled('anexoFiltro')) {
+
+        if ($request->anexoFiltro === 'com') {
+            $query->whereHas('anexos');
+        } else {
+            $query->whereDoesntHave('anexos');
+        }
+
+        return $query;
+    }
+
+    return $query;
+}
+
+
 }

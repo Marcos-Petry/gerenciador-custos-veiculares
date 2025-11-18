@@ -2,14 +2,21 @@
 
 @section('content')
 <div class="py-8 px-6">
+@php
+    $somentePublico = request('from_publico') == 1;
+@endphp
 
     <!-- 🔙 Botão Voltar -->
-    <div class="mb-4">
-        <a href="{{ route('frota.show', $frota->frota_id) }}"
-            class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition">
-            ← Voltar à Frota
-        </a>
-    </div>
+<div class="mb-4">
+    <a href="{{ $somentePublico
+        ? route('frota.show', ['frota' => $frota->frota_id, 'from_publico' => 1])
+        : route('frota.show', $frota->frota_id) }}"
+        
+        class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition">
+        ← Voltar à Frota
+    </a>
+</div>
+
 
     <!-- 🔹 Título -->
     <h1 class="text-2xl font-bold text-white mb-6">🚗 Veículos da Frota: {{ $frota->nome }}</h1>
@@ -23,7 +30,7 @@
                 <!-- Campo -->
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Campo</label>
-                    <select name="campo[]" class="campo rounded-lg border-gray-300 px-3 py-1.5 w-44">
+                    <select name="campo" class="campo rounded-lg border-gray-300 px-3 py-1.5 w-44">
                         <option value="modelo">Modelo</option>
                         <option value="placa">Placa</option>
                         <option value="ano">Ano</option>
@@ -35,7 +42,7 @@
                 <!-- Operador -->
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Operador</label>
-                    <select name="operador[]" class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"></select>
+                    <select name="operador" class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"></select>
                 </div>
 
                 <!-- Valor -->

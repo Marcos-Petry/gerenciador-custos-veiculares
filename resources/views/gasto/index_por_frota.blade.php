@@ -2,14 +2,21 @@
 
 @section('content')
 <div class="py-8 px-6">
+@php
+    $somentePublico = request('from_publico') == 1;
+@endphp
 
     <!-- 🔙 Voltar -->
-    <div class="mb-4">
-        <a href="{{ route('frota.show', $frota->frota_id) }}"
-           class="inline-flex items-center gap-1 px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition">
-           ← Voltar à Frota
-        </a>
-    </div>
+<div class="mb-4">
+    <a href="{{ $somentePublico 
+        ? route('frota.show', ['frota' => $frota->frota_id, 'from_publico' => 1])
+        : route('frota.show', $frota->frota_id) }}"
+        
+       class="inline-flex items-center gap-1 px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition">
+       ← Voltar à Frota
+    </a>
+</div>
+
 
     <!-- Título -->
     <h2 class="text-2xl font-bold text-white mb-6">💰 Gastos da Frota: {{ $frota->nome }}</h2>
@@ -22,7 +29,7 @@
                 <!-- Campo -->
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Campo</label>
-                    <select name="campo[]" class="campo rounded-lg border-gray-300 px-3 py-1.5 w-44">
+                    <select name="campo" class="campo rounded-lg border-gray-300 px-3 py-1.5 w-44">
                         <option value="veiculo">Veículo</option>
                         <option value="descricao">Descrição</option>
                         <option value="valor">Valor</option>
@@ -37,7 +44,7 @@
                 <!-- Operador -->
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Operador</label>
-                    <select name="operador[]" class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"></select>
+                    <select name="operador" class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"></select>
                 </div>
 
                 <!-- Valores -->
@@ -46,7 +53,7 @@
                     <!-- Texto / padrão -->
                     <div class="valor-texto">
                         <label class="block text-white text-sm font-semibold mb-1">Valor</label>
-                        <input type="text" class="inp-texto rounded-lg border-gray-300 px-3 py-1.5 w-80"
+                        <input type="text" name="valor" class="inp-texto rounded-lg border-gray-300 px-3 py-1.5 w-80"
                                placeholder="Digite o valor">
                     </div>
 
@@ -54,8 +61,8 @@
                     <div class="valor-entre hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Entre</label>
                         <div class="flex gap-2">
-                            <input type="number" class="inp-de rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="De">
-                            <input type="number" class="inp-ate rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="Até">
+                            <input type="number" name="valor_de" class="inp-de rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="De">
+                            <input type="number" name="valor_ate" class="inp-ate rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="Até">
                         </div>
                     </div>
 
@@ -68,7 +75,7 @@
                     <!-- Categoria -->
                     <div class="valor-categoria hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Categoria</label>
-                        <select class="sel-categoria rounded-lg border-gray-300 px-3 py-1.5 w-52" disabled>
+                        <select name="categoriaFiltro" class="sel-categoria rounded-lg border-gray-300 px-3 py-1.5 w-52" disabled>
                             <option value="">Selecione</option>
                             <option value="1">Combustível</option>
                             <option value="2">Manutenção</option>
@@ -81,14 +88,14 @@
                     <!-- Usuário -->
                     <div class="valor-usuario hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Usuário</label>
-                        <input type="text" name="usuario" class="inp-usuario rounded-lg border-gray-300 px-3 py-1.5 w-64"
+                        <input type="text" name="usuarioFiltro" class="inp-usuario rounded-lg border-gray-300 px-3 py-1.5 w-64"
                                placeholder="Nome do usuário" disabled>
                     </div>
 
                     <!-- Vínculo -->
                     <div class="valor-vinculo hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Vínculo</label>
-                        <select name="vinculo" class="sel-vinculo rounded-lg border-gray-300 px-3 py-1.5 w-52" disabled>
+                        <select name="vinculoFiltro" class="sel-vinculo rounded-lg border-gray-300 px-3 py-1.5 w-52" disabled>
                             <option value="">Selecione</option>
                             <option value="dono">Sou dono</option>
                             <option value="responsavel">Sou responsável</option>
@@ -98,7 +105,7 @@
                     <!-- Anexos -->
                     <div class="valor-anexo hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Anexos</label>
-                        <select name="anexos" class="sel-anexo rounded-lg border-gray-300 px-3 py-1.5 w-52" disabled>
+                        <select name="anexoFiltro" class="sel-anexo rounded-lg border-gray-300 px-3 py-1.5 w-52" disabled>
                             <option value="">Selecione</option>
                             <option value="com">Com anexos</option>
                             <option value="sem">Sem anexos</option>
@@ -124,22 +131,44 @@
         </div>
     </form>
 
-    <!-- Ações -->
-    <div class="flex flex-wrap gap-2 mb-4">
+<div class="flex flex-wrap gap-2 mb-4">
+
+    {{-- ➕ Incluir — SOMENTE se não for público --}}
+    @if(!$somentePublico)
         <a href="{{ route('frota.gasto.create', $frota->frota_id) }}"
            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
            ➕ Incluir
         </a>
+        {{-- ✏️ Editar --}}
+        <button id="btnEditar"
+                class="px-4 py-2 bg-yellow-500 text-white rounded-lg disabled:opacity-50"
+                @if($somentePublico) disabled @endif>
+            ✏️ Editar
+        </button>
+        {{-- 🗑️ Excluir --}}
+        <button id="btnExcluir"
+                class="px-4 py-2 bg-red-600 text-white rounded-lg disabled:opacity-50"
+                @if($somentePublico) disabled @endif>
+            🗑️ Excluir
+        </button>
+    @endif
 
-        <button id="btnEditar" class="px-4 py-2 bg-yellow-500 text-white rounded-lg disabled:opacity-50" disabled>✏️ Editar</button>
-        <button id="btnVer" class="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50" disabled>👁️ Visualizar</button>
-        <button id="btnExcluir" class="px-4 py-2 bg-red-600 text-white rounded-lg disabled:opacity-50" disabled>🗑️ Excluir</button>
+    {{-- 👁️ Visualizar --}}
+    <button id="btnVer"
+            class="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50"
+            disabled>
+        👁️ Visualizar
+    </button>
 
-        <a href="{{ route('frota.gastos.linha-tempo', $frota->frota_id) }}"
-           class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
-           🕒 Linha do Tempo
-        </a>
-    </div>
+
+    {{-- 🕒 Linha do Tempo — sempre liberado --}}
+    <a href="{{ route('frota.gastos.linha-tempo', $frota->frota_id) }}"
+       class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+       🕒 Linha do Tempo
+    </a>
+
+</div>
+
 
 <!-- 🔹 Tabela -->
 <div class="bg-white rounded-2xl shadow overflow-hidden">
@@ -397,33 +426,61 @@ document.getElementById('add-filtro').addEventListener('click', () => {
 
 // seleção e botões
 let idSelecionado = null, linhaSelecionada = null;
+
+const btnEditar  = document.getElementById('btnEditar');
+const btnVer     = document.getElementById('btnVer');
+const btnExcluir = document.getElementById('btnExcluir');
+
 document.querySelectorAll('.linha-gasto').forEach(linha => {
     linha.addEventListener('click', () => {
-        if (linhaSelecionada) linhaSelecionada.classList.remove('bg-blue-100');
+
+        if (linhaSelecionada)
+            linhaSelecionada.classList.remove('bg-blue-100');
+
         linhaSelecionada = linha;
         linha.classList.add('bg-blue-100');
+
         idSelecionado = linha.getAttribute('data-id');
-        btnEditar.disabled = btnVer.disabled = btnExcluir.disabled = false;
+
+        // 👁️ Sempre habilita Ver
+        btnVer.disabled = false;
+
+        // 🔐 Só habilita Editar/Excluir se NÃO for público
+        @if(!$somentePublico)
+            btnEditar.disabled = false;
+            btnExcluir.disabled = false;
+        @endif
     });
 });
-const btnEditar = document.getElementById('btnEditar');
-const btnVer    = document.getElementById('btnVer');
-const btnExcluir= document.getElementById('btnExcluir');
 
-btnEditar.addEventListener('click', () => {
-    if (idSelecionado) window.location.href = `{{ route('gastos.edit', ':id') }}`.replace(':id', idSelecionado);
-});
+// 👁️ Ver – sempre permitido
 btnVer.addEventListener('click', () => {
-    if (idSelecionado) window.location.href = `{{ route('gastos.show', ':id') }}`.replace(':id', idSelecionado);
+    if (idSelecionado)
+        window.location.href = `{{ route('gastos.show', ':id') }}`.replace(':id', idSelecionado);
 });
+
+// ✏️ Editar – somente se não for público
+@if(!$somentePublico)
+btnEditar.addEventListener('click', () => {
+    if (idSelecionado)
+        window.location.href = `{{ route('gastos.edit', ':id') }}`.replace(':id', idSelecionado);
+});
+@endif
+
+// 🗑️ Excluir – somente se não for público
+@if(!$somentePublico)
 btnExcluir.addEventListener('click', () => {
     if (!idSelecionado) return;
+
     if (confirm('Tem certeza que deseja excluir este gasto?')) {
         fetch(`{{ route('gastos.destroy', ':id') }}`.replace(':id', idSelecionado), {
             method: 'DELETE',
             headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-        }).then(r => r.ok ? location.reload() : alert('Erro ao excluir gasto.'));
+        }).then(r =>
+            r.ok ? location.reload() : alert('Erro ao excluir gasto.')
+        );
     }
 });
+@endif
 </script>
 @endsection

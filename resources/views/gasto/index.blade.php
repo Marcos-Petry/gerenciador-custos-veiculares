@@ -2,7 +2,9 @@
 
 @section('content')
 <div class="py-4 px-6">
-
+@php
+    $somentePublico = request('from_publico') == 1;
+@endphp
     <h1 class="text-2xl font-bold text-white mb-6">💰 Meus Gastos</h1>
 
     <!-- 🔹 Filtros -->
@@ -13,7 +15,7 @@
                 <!-- Campo -->
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Campo</label>
-                    <select name="campo[]" class="campo rounded-lg border-gray-300 px-3 py-1.5 w-44">
+                    <select name="campo" class="campo rounded-lg border-gray-300 px-3 py-1.5 w-44">
                         <option value="veiculo">Veículo</option>
                         <option value="frota">Frota</option>
                         <option value="descricao">Descrição</option>
@@ -29,7 +31,7 @@
                 <!-- Operador -->
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Operador</label>
-                    <select name="operador[]" class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"></select>
+                    <select name="operador" class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"></select>
                 </div>
 
                 <!-- Valores -->
@@ -38,7 +40,7 @@
                     <!-- Texto -->
                     <div class="valor-texto">
                         <label class="block text-white text-sm font-semibold mb-1">Valor</label>
-                        <input type="text" class="inp-texto rounded-lg border-gray-300 px-3 py-1.5 w-80"
+                        <input type="text" name="valor" class="inp-texto rounded-lg border-gray-300 px-3 py-1.5 w-80"
                             placeholder="Digite o valor">
                     </div>
 
@@ -46,8 +48,8 @@
                     <div class="valor-entre hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Entre</label>
                         <div class="flex gap-2">
-                            <input type="number" class="inp-de rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="De">
-                            <input type="number" class="inp-ate rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="Até">
+                            <input type="number" name="valor_de" class="inp-de rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="De">
+                            <input type="number" name="valor_ate" class="inp-ate rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="Até">
                         </div>
                     </div>
 
@@ -60,7 +62,7 @@
                     <!-- Categoria -->
                     <div class="valor-categoria hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Categoria</label>
-                        <select class="sel-categoria rounded-lg border-gray-300 px-3 py-1.5 w-52" disabled>
+                        <select name="categoriaFiltro" class="sel-categoria rounded-lg border-gray-300 px-3 py-1.5 w-52" disabled>
                             <option value="">Selecione</option>
                             <option value="1">Combustível</option>
                             <option value="2">Manutenção</option>
@@ -73,7 +75,7 @@
                     <!-- Frota -->
                     <div class="valor-frota hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Frota</label>
-                        <select class="sel-frota rounded-lg border-gray-300 px-3 py-1.5 w-64" disabled>
+                        <select name="frotaFiltro" class="sel-frota rounded-lg border-gray-300 px-3 py-1.5 w-64" disabled>
                             <option value="">Selecione a frota</option>
                             @foreach($frotas as $f)
                                 <option value="{{ $f->frota_id }}">{{ $f->nome }}</option>
@@ -84,7 +86,7 @@
                     <!-- Vínculo -->
                     <div class="valor-vinculo hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Vínculo</label>
-                        <select class="sel-vinculo rounded-lg border-gray-300 px-3 py-1.5 w-52" disabled>
+                        <select name="vinculoFiltro" class="sel-vinculo rounded-lg border-gray-300 px-3 py-1.5 w-52" disabled>
                             <option value="">Selecione</option>
                             <option value="dono">Sou dono</option>
                             <option value="responsavel">Sou responsável</option>
@@ -94,14 +96,14 @@
                     <!-- Usuário -->
                     <div class="valor-usuario hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Incluído por</label>
-                        <input type="text" class="inp-usuario rounded-lg border-gray-300 px-3 py-1.5 w-72"
+                        <input type="text" name="usuarioFiltro" class="inp-usuario rounded-lg border-gray-300 px-3 py-1.5 w-72"
                             placeholder="Nome do usuário" disabled>
                     </div>
 
                     <!-- Anexos -->
                     <div class="valor-anexo hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Anexos</label>
-                        <select class="sel-anexo rounded-lg border-gray-300 px-3 py-1.5 w-52" disabled>
+                        <select name="anexoFiltro" class="sel-anexo rounded-lg border-gray-300 px-3 py-1.5 w-52" disabled>
                             <option value="">Selecione</option>
                             <option value="com">Com anexos</option>
                             <option value="sem">Sem anexos</option>
@@ -130,23 +132,28 @@
 <!-- 🔹 Ações -->
 <div class="flex flex-wrap gap-2 mb-4 mt-4 sm:mt-0">
 
-    <a href="{{ route('gastos.create') }}"
-       class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-       ➕ Incluir
-    </a>
+    @if(!$somentePublico)
+        <a href="{{ route('gastos.create') }}"
+           class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+           ➕ Incluir
+        </a>
 
-    <button id="btnEditar"
-            class="px-4 py-2 bg-yellow-500 text-white rounded-lg disabled:opacity-50"
-            disabled>✏️ Editar</button>
+        <button id="btnEditar"
+                class="px-4 py-2 bg-yellow-500 text-white rounded-lg disabled:opacity-50"
+                disabled>✏️ Editar</button>
 
+        <button id="btnExcluir"
+                class="px-4 py-2 bg-red-600 text-white rounded-lg disabled:opacity-50"
+                disabled>🗑️ Excluir</button>
+    @endif
+
+    {{-- 👁 Sempre disponível --}}
     <button id="btnVer"
             class="px-4 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50"
             disabled>👁️ Visualizar</button>
 
-    <button id="btnExcluir"
-            class="px-4 py-2 bg-red-600 text-white rounded-lg disabled:opacity-50"
-            disabled>🗑️ Excluir</button>
 </div>
+
 
 
     <!-- 🔹 Tabela -->
@@ -411,32 +418,59 @@ document.querySelectorAll('.filtro-item').forEach(atualizarLinha);
 // seleção + botões CRUD
 let linhaSelecionada = null;
 let idSelecionado = null;
+
 document.querySelectorAll('.linha-gasto').forEach(linha => {
     linha.addEventListener('click', () => {
-        if (linhaSelecionada) linhaSelecionada.classList.remove('bg-blue-100');
+
+        if (linhaSelecionada)
+            linhaSelecionada.classList.remove('bg-blue-100');
+
         linhaSelecionada = linha;
         linhaSelecionada.classList.add('bg-blue-100');
+
         idSelecionado = linha.getAttribute('data-id');
-        document.getElementById('btnEditar').disabled = false;
+
+        // 👁️ Visualizar sempre habilita
         document.getElementById('btnVer').disabled = false;
-        document.getElementById('btnExcluir').disabled = false;
+
+        // 🔐 Se NÃO for público, habilita Editar/Excluir
+        @if(!$somentePublico)
+            document.getElementById('btnEditar').disabled = false;
+            document.getElementById('btnExcluir').disabled = false;
+        @endif
     });
 });
 
-document.getElementById('btnEditar').addEventListener('click', () => {
-    if (idSelecionado) window.location.href = @json(route('gastos.edit', ':id')).replace(':id', idSelecionado);
-});
+// 👁️ Visualizar (SEM restrição)
 document.getElementById('btnVer').addEventListener('click', () => {
-    if (idSelecionado) window.location.href = @json(route('gastos.show', ':id')).replace(':id', idSelecionado);
+    if (idSelecionado)
+        window.location.href = @json(route('gastos.show', ':id')).replace(':id', idSelecionado);
 });
+
+
+// ✏️ Editar (SOMENTE quando não for público)
+@if(!$somentePublico)
+document.getElementById('btnEditar').addEventListener('click', () => {
+    if (idSelecionado)
+        window.location.href = @json(route('gastos.edit', ':id')).replace(':id', idSelecionado);
+});
+@endif
+
+// 🗑️ Excluir (SOMENTE quando não for público)
+@if(!$somentePublico)
 document.getElementById('btnExcluir').addEventListener('click', () => {
     if (!idSelecionado) return;
+
     if (confirm('Tem certeza que deseja excluir este gasto?')) {
         fetch(@json(route('gastos.destroy', ':id')).replace(':id', idSelecionado), {
             method: 'DELETE',
             headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-        }).then(r => r.ok ? location.reload() : alert('Erro ao excluir gasto.'));
+        }).then(r =>
+            r.ok ? location.reload() : alert('Erro ao excluir gasto.')
+        );
     }
 });
+@endif
+
 </script>
 @endsection

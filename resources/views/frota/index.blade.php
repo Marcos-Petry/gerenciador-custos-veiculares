@@ -11,7 +11,7 @@
             <div class="filtro-item flex flex-wrap items-end gap-3">
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Campo</label>
-                    <select name="campo[]" class="campo rounded-lg border-gray-300 px-3 py-1.5 w-44">
+                    <select name="campo" class="campo rounded-lg border-gray-300 px-3 py-1.5 w-44">
                         <option value="nome">Nome</option>
                         <option value="descricao">Descrição</option>
                         <option value="visibilidade">Visibilidade</option>
@@ -21,34 +21,35 @@
 
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Operador</label>
-                    <select name="operador[]" class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"></select>
+                    <select name="operador" class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"></select>
                 </div>
 
-                <div class="valor-container flex items-end gap-2">
-                    <div class="valor-texto">
-                        <label class="block text-white text-sm font-semibold mb-1">Valor</label>
-                        <input type="text" name="valor[]" placeholder="Digite o valor"
-                            class="rounded-lg border-gray-300 px-3 py-1.5 w-80">
-                    </div>
-
-                    <div class="valor-visibilidade hidden">
-                        <label class="block text-white text-sm font-semibold mb-1">Visibilidade</label>
-                        <select name="valor[]" class="rounded-lg border-gray-300 px-3 py-1.5 w-44" disabled>
-                            <option value="">Selecione</option>
-                            <option value="1">Pública</option>
-                            <option value="0">Privada</option>
-                        </select>
-                    </div>
-
-                    <div class="valor-vinculo hidden">
-                        <label class="block text-white text-sm font-semibold mb-1">Vínculo</label>
-                        <select name="valor[]" class="rounded-lg border-gray-300 px-3 py-1.5 w-44" disabled>
-                            <option value="">Selecione</option>
-                            <option value="dono">Sou dono</option>
-                            <option value="responsavel">Sou responsável</option>
-                        </select>
-                    </div>
+                <div class="valor-texto">
+                    <label class="block text-white text-sm font-semibold mb-1">Valor</label>
+                    <input type="text" name="valor_texto"
+                        class="inp-texto rounded-lg border-gray-300 px-3 py-1.5 w-80">
                 </div>
+
+                <div class="valor-visibilidade hidden">
+                    <label class="block text-white text-sm font-semibold mb-1">Visibilidade</label>
+                    <select name="valor_visibilidade"
+                        class="sel-visibilidade rounded-lg border-gray-300 px-3 py-1.5 w-44" disabled>
+                        <option value="">Selecione</option>
+                        <option value="1">Pública</option>
+                        <option value="0">Privada</option>
+                    </select>
+                </div>
+
+                <div class="valor-vinculo hidden">
+                    <label class="block text-white text-sm font-semibold mb-1">Vínculo</label>
+                    <select name="valor_vinculo"
+                        class="sel-vinculo rounded-lg border-gray-300 px-3 py-1.5 w-44" disabled>
+                        <option value="">Selecione</option>
+                        <option value="dono">Sou dono</option>
+                        <option value="responsavel">Sou responsável</option>
+                    </select>
+                </div>
+
 
                 <div class="flex items-end gap-2 botoes-principais">
                     <button type="button" id="add-filtro"

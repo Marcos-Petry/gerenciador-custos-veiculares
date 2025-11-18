@@ -15,7 +15,7 @@
                 <!-- Campo -->
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Campo</label>
-                    <select name="campo[]" class="campo rounded-lg border-gray-300 px-3 py-1.5 w-44">
+                    <select name="campo" class="campo rounded-lg border-gray-300 px-3 py-1.5 w-44">
                         <option value="modelo">Modelo</option>
                         <option value="placa">Placa</option>
                         <option value="ano">Ano</option>
@@ -27,7 +27,7 @@
                 <!-- Operador -->
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Operador</label>
-                    <select name="operador[]" class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"></select>
+                    <select name="operador" class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"></select>
                 </div>
 
                 <!-- Valor -->
@@ -35,7 +35,7 @@
                     <!-- Valor texto -->
                     <div class="valor-texto">
                         <label class="block text-white text-sm font-semibold mb-1">Valor</label>
-                        <input type="text" name="valor[]" placeholder="Digite o valor"
+                        <input type="text" name="valor" placeholder="Digite o valor"
                                class="rounded-lg border-gray-300 px-3 py-1.5 w-80">
                     </div>
 
@@ -43,15 +43,15 @@
                     <div class="valor-entre hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Entre</label>
                         <div class="flex gap-2">
-                            <input type="number" name="valor_de[]" class="rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="De">
-                            <input type="number" name="valor_ate[]" class="rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="Até">
+                            <input type="number" name="valor_de" class="rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="De">
+                            <input type="number" name="valor_ate" class="rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="Até">
                         </div>
                     </div>
 
                     <!-- Valor visibilidade -->
                     <div class="valor-visibilidade hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Visibilidade</label>
-                        <select name="valor[]" class="rounded-lg border-gray-300 px-3 py-1.5 w-44" disabled>
+                        <select name="valor_visibilidade" class="rounded-lg border-gray-300 px-3 py-1.5 w-44" disabled>
                             <option value="">Selecione</option>
                             <option value="1">Público</option>
                             <option value="0">Privado</option>
@@ -61,7 +61,7 @@
                     <!-- Valor vínculo -->
                     <div class="valor-vinculo hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Vínculo</label>
-                        <select name="valor[]" class="rounded-lg border-gray-300 px-3 py-1.5 w-44" disabled>
+                        <select name="valor_vinculo" class="rounded-lg border-gray-300 px-3 py-1.5 w-44" disabled>
                             <option value="">Selecione</option>
                             <option value="dono">Sou dono</option>
                             <option value="responsavel">Sou responsável</option>

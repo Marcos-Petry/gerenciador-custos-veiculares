@@ -26,20 +26,17 @@ public function index(Request $request)
         });
 
     // ==========================
-    // FILTROS DINÂMICOS
+    // FILTRO ÚNICO (MESMO ESQUEMA DA TELA DE GASTOS)
     // ==========================
-    $campos     = $request->campo     ?? [];
-    $operadores = $request->operador  ?? [];
-    $valores    = $request->valor     ?? [];
-    $valorDe    = $request->valor_de  ?? [];
-    $valorAte   = $request->valor_ate ?? [];
+    $campo            = $request->input('campo');
+    $operador         = $request->input('operador');
+    $valor            = $request->input('valor');
+    $valorDe          = $request->input('valor_de');
+    $valorAte         = $request->input('valor_ate');
+    $valorVisibilidade = $request->input('valor_visibilidade');
+    $valorVinculo      = $request->input('valor_vinculo');
 
-    foreach ($campos as $i => $campo) {
-
-        $op = $operadores[$i] ?? null;
-        $valor = $valores[$i] ?? null;
-
-        if (!$campo || !$op) continue;
+    if ($campo && $operador) {
 
         switch ($campo) {
 
@@ -47,62 +44,69 @@ public function index(Request $request)
             // MODELO
             // --------------------
             case 'modelo':
-                if ($op == '=')      $query->where('modelo', $valor);
-                if ($op == 'like')   $query->where('modelo', 'LIKE', "%$valor%");
-                if ($op == 'starts') $query->where('modelo', 'LIKE', "$valor%");
-                if ($op == 'ends')   $query->where('modelo', 'LIKE', "%$valor");
+                if ($valor !== null && $valor !== '') {
+                    if ($operador === '=') {
+                        $query->where('modelo', $valor);
+                    } elseif ($operador === 'like') {
+                        $query->where('modelo', 'like', "%{$valor}%");
+                    } elseif ($operador === 'starts') {
+                        $query->where('modelo', 'like', "{$valor}%");
+                    } elseif ($operador === 'ends') {
+                        $query->where('modelo', 'like', "%{$valor}");
+                    }
+                }
                 break;
 
             // --------------------
             // PLACA
             // --------------------
             case 'placa':
-                if ($op == '=')    $query->where('placa', $valor);
-                if ($op == 'like') $query->where('placa', 'LIKE', "%$valor%");
+                if ($valor !== null && $valor !== '') {
+                    if ($operador === '=') {
+                        $query->where('placa', $valor);
+                    } elseif ($operador === 'like') {
+                        $query->where('placa', 'like', "%{$valor}%");
+                    }
+                }
                 break;
 
             // --------------------
             // ANO
             // --------------------
             case 'ano':
-                if ($op == '=')    $query->where('ano', $valor);
-                if ($op == '>')    $query->where('ano', '>', $valor);
-                if ($op == '<')    $query->where('ano', '<', $valor);
-
-                if ($op == 'between') {
-                    $de  = $valorDe[$i]  ?? null;
-                    $ate = $valorAte[$i] ?? null;
-
-                    if ($de !== null && $ate !== null) {
-                        $query->whereBetween('ano', [$de, $ate]);
+                if ($operador === 'between' && $valorDe !== null && $valorAte !== null && $valorDe !== '' && $valorAte !== '') {
+                    $query->whereBetween('ano', [$valorDe, $valorAte]);
+                } elseif ($valor !== null && $valor !== '') {
+                    if ($operador === '=') {
+                        $query->where('ano', $valor);
+                    } elseif ($operador === '>') {
+                        $query->where('ano', '>', $valor);
+                    } elseif ($operador === '<') {
+                        $query->where('ano', '<', $valor);
                     }
                 }
                 break;
 
             // --------------------
-            // VISIBILIDADE (0/1)
+            // VISIBILIDADE (usa valor_visibilidade)
             // --------------------
             case 'visibilidade':
-                if ($valor !== null && $valor !== '') {
-                    $query->where('visibilidade', $valor);
+                if ($valorVisibilidade !== null && $valorVisibilidade !== '') {
+                    $query->where('visibilidade', $valorVisibilidade);
                 }
                 break;
 
             // --------------------
-            // VÍNCULO
+            // VÍNCULO (usa valor_vinculo)
             // --------------------
             case 'vinculo':
-
-                if ($valor === 'dono') {
+                if ($valorVinculo === 'dono') {
                     $query->where('usuario_dono_id', $user->id);
-                }
-
-                if ($valor === 'responsavel') {
+                } elseif ($valorVinculo === 'responsavel') {
                     $query->whereHas('responsavel', function ($r) use ($user) {
                         $r->where('usucodigo', $user->id);
                     });
                 }
-
                 break;
         }
     }
@@ -113,7 +117,7 @@ public function index(Request $request)
     $veiculos = $query
         ->orderBy('modelo')
         ->paginate(6)
-        ->appends($request->query()); // mantém filtros na URL
+        ->appends($request->query());
 
     // ==========================
     // OUTRAS VARIÁVEIS DA VIEW
@@ -123,9 +127,6 @@ public function index(Request $request)
 
     return view('veiculo.index', compact('veiculos', 'origemCampoExterno', 'modoSomenteVisualizacao'));
 }
-
-
-
 
     public function create(Request $request)
     {
@@ -324,8 +325,6 @@ public function index(Request $request)
         // O cancelamento deve ser feito manualmente pelo botão na interface.
     }
 
-
-
     public function indexPorFrota($frota_id)
     {
         $user = Auth::user();
@@ -333,25 +332,27 @@ public function index(Request $request)
         // Carrega a frota com seus veículos e responsáveis
         $frota = \App\Models\Frota::with(['veiculos', 'responsavel'])->findOrFail($frota_id);
 
-        // Verifica se o usuário é dono da frota OU está listado na tabela pivot responsavelfrota
-        $usuarioEhDono = $frota->usuario_dono_id === $user->id;
-        $usuarioEhResponsavel = $frota->responsavel->contains('id', $user->id);
+        // Verifica permissões
+        $usuarioEhDono = $frota->usuario_dono_id === ($user->id ?? null);
+        $usuarioEhResponsavel = $frota->responsavel->contains('id', $user->id ?? null);
+        $frotaEhPublica = $frota->visibilidade == 1;
 
-        if (!($usuarioEhDono || $usuarioEhResponsavel)) {
+        // Se não for pública, nem dono e nem responsável → acesso negado
+        if (!($frotaEhPublica || $usuarioEhDono || $usuarioEhResponsavel)) {
             abort(403, 'Você não tem permissão para acessar esta frota.');
         }
 
-        // Determina modo de exibição (somente visualização para responsáveis)
+        // Determina modo de exibição (somente visualização para responsáveis e público)
         $modoSomenteVisualizacao = !$usuarioEhDono;
 
-        // 🔹 Carrega todos os veículos vinculados a esta frota
-        // Mesmo que o usuário logado não seja dono dos veículos, poderá visualizá-los
+        // Carrega os veículos da frota
         $veiculos = \App\Models\Veiculo::where('frota_id', $frota_id)
             ->orderBy('modelo')
             ->paginate(9);
 
         return view('veiculo.index_por_frota', compact('frota', 'veiculos', 'modoSomenteVisualizacao'));
     }
+
     /**
      * Sincroniza os responsáveis de um veículo (adiciona, mantém e remove)
      * e cria notificações adequadas (convite ou aviso de remoção).

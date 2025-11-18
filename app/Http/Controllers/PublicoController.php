@@ -19,7 +19,12 @@ class PublicoController extends Controller
         $campo    = $request->input('campo');
         $operador = $request->input('operador', 'like');
         $valor    = $request->input('valor');
+        $valorDe  = $request->input('valor_de');
+        $valorAte = $request->input('valor_ate');
+        $tipoFiltro = $request->input('tipoFiltro');
+        $relFiltro  = $request->input('relacionamentoFiltro');
         $origem   = $request->input('origemCampoExterno');
+
 
         // ====== Consulta base de veículos ======
         $veiculosQ = DB::table('veiculo as v')
@@ -74,13 +79,44 @@ class PublicoController extends Controller
         $q = DB::query()->fromSub($base, 'pub');
 
         // ====== Filtros de pesquisa ======
-        if ($campo && $valor !== null && $valor !== '') {
-            if ($operador === 'like') {
-                $q->where($campo, 'ILIKE', "%{$valor}%");
-            } elseif (in_array($operador, ['=', '>', '<'])) {
-                $q->where($campo, $operador, $valor);
+        if ($campo) {
+            switch ($campo) {
+                case 'titulo':
+                case 'placa':
+                case 'frota_nome':
+                    if ($valor !== null && $valor !== '') {
+                        if ($operador === 'like') {
+                            $q->where($campo, 'ILIKE', "%{$valor}%");
+                        } elseif (in_array($operador, ['=', '>', '<'])) {
+                            $q->where($campo, $operador, $valor);
+                        }
+                    }
+                    break;
+
+                case 'ano':
+                    if ($operador === 'between' && $valorDe !== null && $valorAte !== null) {
+                        $q->whereBetween('ano', [$valorDe, $valorAte]);
+                    } elseif ($valor !== null && $valor !== '' && in_array($operador, ['=', '>', '<'])) {
+                        $q->where('ano', $operador, $valor);
+                    }
+                    break;
+
+                case 'tipoFiltro':
+                    if ($tipoFiltro === 'veiculo' || $tipoFiltro === 'frota') {
+                        $q->where('tipo', $tipoFiltro);
+                    }
+                    break;
+
+                case 'relacionamentoFiltro':
+                    if ($relFiltro === 'com_frota') {
+                        $q->whereNotNull('frota_nome');
+                    } elseif ($relFiltro === 'sem_frota') {
+                        $q->whereNull('frota_nome');
+                    }
+                    break;
             }
         }
+
 
         // ====== Paginação ======
         $itens = $q->orderByDesc('created_at')

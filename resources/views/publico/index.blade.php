@@ -12,7 +12,7 @@
                 <!-- Campo -->
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Campo</label>
-                    <select name="campo[]" class="campo rounded-lg border-gray-300 px-3 py-1.5 w-52">
+                    <select name="campo" class="campo rounded-lg border-gray-300 px-3 py-1.5 w-52">
                         <option value="titulo">Nome/Modelo</option>
                         <option value="placa">Placa</option>
                         <option value="ano">Ano</option>
@@ -25,7 +25,7 @@
                 <!-- Operador -->
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Operador</label>
-                    <select name="operador[]" class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"></select>
+                    <select name="operador" class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"></select>
                 </div>
 
                 <!-- Valores -->
@@ -34,7 +34,8 @@
                     <!-- Texto -->
                     <div class="valor-texto">
                         <label class="block text-white text-sm font-semibold mb-1">Valor</label>
-                        <input type="text" class="inp-texto rounded-lg border-gray-300 px-3 py-1.5 w-80"
+                        <input type="text"
+                            name="valor" class="inp-texto rounded-lg border-gray-300 px-3 py-1.5 w-80"
                             placeholder="Digite o valor">
                     </div>
 
@@ -42,15 +43,17 @@
                     <div class="valor-entre hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Entre</label>
                         <div class="flex gap-2">
-                            <input type="number" class="inp-de rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="De">
-                            <input type="number" class="inp-ate rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="Até">
+                        <input type="number" name="valor_de"
+                            class="inp-de rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="De">
+                        <input type="number" name="valor_ate"
+                            class="inp-ate rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="Até">
                         </div>
                     </div>
 
                     <!-- Tipo -->
                     <div class="valor-tipo hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Tipo</label>
-                        <select class="sel-tipo rounded-lg border-gray-300 px-3 py-1.5 w-52" disabled>
+                        <select name="tipoFiltro" class="sel-tipo rounded-lg border-gray-300 px-3 py-1.5 w-52" disabled>
                             <option value="">Selecione</option>
                             <option value="veiculo">Veículo</option>
                             <option value="frota">Frota</option>
@@ -60,7 +63,7 @@
                     <!-- Relacionamento -->
                     <div class="valor-relacionamento hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Relacionamento</label>
-                        <select class="sel-relacionamento rounded-lg border-gray-300 px-3 py-1.5 w-64" disabled>
+                        <select name="relacionamentoFiltro" class="sel-relacionamento rounded-lg border-gray-300 px-3 py-1.5 w-64" disabled>
                             <option value="">Selecione</option>
                             <option value="com_frota">Com Frota</option>
                             <option value="sem_frota">Sem Frota</option>
@@ -143,15 +146,15 @@
                             <div class="flex gap-2">
                                 {{-- 👁️ Ver --}}
                                 <a href="{{ $item->tipo === 'veiculo'
-                                            ? route('veiculo.show', ['veiculo' => $item->id, 'from_publico' => 1])
-                                            : route('frota.show', $item->id) }}"
+                                    ? route('veiculo.show', ['veiculo' => $item->id, 'from_publico' => 1])
+                                    : route('frota.show', ['frota' => $item->id, 'from_publico' => 1]) }}"
                                     class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-1">
                                     👁️ Ver
                                 </a>
 
                                 {{-- 💰 Gastos --}}
                                 @if($item->tipo === 'veiculo')
-                                    <a href="{{ route('veiculo.gastos.index', $item->id) }}"
+                                    <a href="{{ route('veiculo.gastos.index', ['veiculo' => $item->id,'from_publico' => 1]) }}"
                                         class="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-1">
                                         💰 Gastos
                                     </a>
