@@ -16,41 +16,46 @@ class PainelController extends Controller
     public function index()
     {
         $usuarioId = Auth::id();
+        $usuarioCodigo = Auth::user()->id; // pivot usa ID da tabela users
 
-        // 🔹 Total de veículos (como dono)
+        // ============================================================
+        // 🔹 BUSCA TODOS OS VEÍCULOS DO USUÁRIO (DONO + RESPONSÁVEL)
+        // ============================================================
+        $veiculosIds = Veiculo::where('usuario_dono_id', $usuarioId)
+            ->orWhereHas('responsavel', fn($q) => $q->where('usucodigo', $usuarioCodigo))
+            ->pluck('veiculo_id');   // ✔ PK REAL do veículo
+
+        // ============================================================
+        // 🔹 CONTAGEM DE VEÍCULOS E FROTAS
+        // ============================================================
         $veiculosComoDono = Veiculo::where('usuario_dono_id', $usuarioId)->count();
 
-        // 🔹 Total de veículos (como responsável)
-        $veiculosComoResponsavel = Veiculo::whereHas('responsavel', function ($q) use ($usuarioId) {
-            $q->where('users.id', $usuarioId);
+        $veiculosComoResponsavel = Veiculo::whereHas('responsavel', function ($q) use ($usuarioCodigo) {
+            $q->where('usucodigo', $usuarioCodigo);
         })->count();
 
-        // 🔹 Total de frotas (como dono)
         $frotasComoDono = Frota::where('usuario_dono_id', $usuarioId)->count();
 
-        // 🔹 Total de frotas (como responsável)
-        $frotasComoResponsavel = Frota::whereHas('responsavel', function ($q) use ($usuarioId) {
-            $q->where('users.id', $usuarioId);
+        $frotasComoResponsavel = Frota::whereHas('responsavel', function ($q) use ($usuarioCodigo) {
+            $q->where('usucodigo', $usuarioCodigo);
         })->count();
 
-        // 🔹 Total de gastos do mês atual
-        // 🔹 Total de gastos (últimos 5 meses)
-        $gastosMes = Gasto::whereHas('veiculo', function ($q) use ($usuarioId) {
-            $q->where('usuario_dono_id', $usuarioId);
-        })
-            ->where('data_gasto', '>=', Carbon::now()->subMonths(4)->startOfMonth()) // últimos 5 meses
+        // ============================================================
+        // 🔹 TOTAL GASTO (ÚLTIMOS 5 MESES)
+        // ============================================================
+        $gastosMes = Gasto::whereIn('veiculo_id', $veiculosIds)
+            ->where('data_gasto', '>=', Carbon::now()->subMonths(4)->startOfMonth())
             ->sum('valor');
 
-
-        // 🔹 Gastos mensais (últimos 5 meses)
+        // ============================================================
+        // 🔹 GASTOS MENSAIS → GRÁFICO DE COLUNAS
+        // ============================================================
         $gastosMensais = Gasto::select(
             DB::raw('EXTRACT(MONTH FROM data_gasto) as mes'),
             DB::raw('SUM(valor) as total')
         )
-            ->whereHas('veiculo', function ($q) use ($usuarioId) {
-                $q->where('usuario_dono_id', $usuarioId);
-            })
-            ->where('data_gasto', '>=', Carbon::now()->subMonths(5))
+            ->whereIn('veiculo_id', $veiculosIds)
+            ->where('data_gasto', '>=', Carbon::now()->subMonths(5)->startOfMonth())
             ->groupBy('mes')
             ->orderBy('mes')
             ->get();
@@ -64,24 +69,26 @@ class PainelController extends Controller
             $valores[] = floatval($gasto->total);
         }
 
-        // 🔹 Distribuição dos gastos por categoria
-        // 🔹 Distribuição dos gastos por categoria (últimos 5 meses)
+        // ============================================================
+        // 🔹 DISTRIBUIÇÃO POR CATEGORIA (GRÁFICO HORIZONTAL)
+        // ============================================================
         if (Schema::hasColumn('gasto', 'categoria')) {
             $gastosPorCategoria = Gasto::select('categoria', DB::raw('SUM(valor) as total'))
-                ->whereHas('veiculo', function ($q) use ($usuarioId) {
-                    $q->where('usuario_dono_id', $usuarioId);
-                })
-                ->where('data_gasto', '>=', Carbon::now()->subMonths(4)->startOfMonth()) // últimos 5 meses
+                ->whereIn('veiculo_id', $veiculosIds)
+                ->where('data_gasto', '>=', Carbon::now()->subMonths(4)->startOfMonth())
                 ->groupBy('categoria')
                 ->orderBy('categoria')
                 ->get()
-                ->mapWithKeys(fn($item) => [$item->categoriaTexto() => floatval($item->total)]);
+                ->mapWithKeys(fn($item) => [
+                    $item->categoriaTexto() => floatval($item->total)
+                ]);
         } else {
             $gastosPorCategoria = collect();
         }
 
-
-        // 🔹 Retorna tudo para a view
+        // ============================================================
+        // 🔹 RETORNA PARA A VIEW
+        // ============================================================
         return view('dashboard', compact(
             'veiculosComoDono',
             'veiculosComoResponsavel',
