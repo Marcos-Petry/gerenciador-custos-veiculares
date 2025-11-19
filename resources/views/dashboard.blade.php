@@ -145,21 +145,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // ===== Gráfico de evolução =====
 const ctxEvolucao = document.getElementById('evolucaoGastos');
 if (ctxEvolucao) {
-    const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-    const agora = new Date();
-    const mesAtual = agora.getMonth(); // 0 = Jan, 11 = Dez
 
-    // 🔹 Gera os últimos 5 meses (excluindo meses futuros)
-    const labels = Array.from({ length: 5 }, (_, i) => {
-        const mes = (mesAtual - 4 + i + 12) % 12;
-        return mesesNomes[mes];
-    });
-
-    // 🔹 Preenche os valores conforme labels do backend
-    const valoresCompletos = labels.map(m => {
-        const i = labelsOriginais.indexOf(m);
-        return i !== -1 ? valoresOriginais[i] : 0;
-    });
+    const labels = labelsOriginais;      
+    const valoresCompletos = valoresOriginais;
 
     new Chart(ctxEvolucao, {
         type: 'bar',
@@ -209,7 +197,6 @@ if (ctxEvolucao) {
         plugins: [ChartDataLabels]
     });
 }
-
 
     // ===== Gráfico de distribuição =====
     const ctxDistribuicao = document.getElementById('distribuicaoGastos');
