@@ -325,32 +325,113 @@ public function index(Request $request)
         // O cancelamento deve ser feito manualmente pelo botão na interface.
     }
 
-    public function indexPorFrota($frota_id)
+    public function indexPorFrota(Request $request, $frota_id)
     {
         $user = Auth::user();
 
-        // Carrega a frota com seus veículos e responsáveis
-        $frota = \App\Models\Frota::with(['veiculos', 'responsavel'])->findOrFail($frota_id);
+        // Carrega a frota
+        $frota = \App\Models\Frota::with(['responsavel'])->findOrFail($frota_id);
 
-        // Verifica permissões
+        // Permissões
         $usuarioEhDono = $frota->usuario_dono_id === ($user->id ?? null);
         $usuarioEhResponsavel = $frota->responsavel->contains('id', $user->id ?? null);
         $frotaEhPublica = $frota->visibilidade == 1;
 
-        // Se não for pública, nem dono e nem responsável → acesso negado
         if (!($frotaEhPublica || $usuarioEhDono || $usuarioEhResponsavel)) {
             abort(403, 'Você não tem permissão para acessar esta frota.');
         }
 
-        // Determina modo de exibição (somente visualização para responsáveis e público)
         $modoSomenteVisualizacao = !$usuarioEhDono;
 
-        // Carrega os veículos da frota
-        $veiculos = \App\Models\Veiculo::where('frota_id', $frota_id)
-            ->orderBy('modelo')
-            ->paginate(9);
+        // ===============================
+        // 🔍 BASE DA QUERY
+        // ===============================
+        $query = \App\Models\Veiculo::where('frota_id', $frota_id);
 
-        return view('veiculo.index_por_frota', compact('frota', 'veiculos', 'modoSomenteVisualizacao'));
+        // ===============================
+        // 🔍 FILTROS IGUAL TELA MEUS VEÍCULOS
+        // ===============================
+        $campo            = $request->input('campo');
+        $operador         = $request->input('operador');
+        $valor            = $request->input('valor');
+        $valorDe          = $request->input('valor_de');
+        $valorAte         = $request->input('valor_ate');
+        $valorVisibilidade = $request->input('valor_visibilidade');
+        $valorVinculo      = $request->input('valor_vinculo');
+
+        if ($campo && $operador) {
+
+            switch ($campo) {
+
+                case 'modelo':
+                    if ($valor !== null && $valor !== '') {
+                        if ($operador === '=') {
+                            $query->where('modelo', $valor);
+                        } elseif ($operador === 'like') {
+                            $query->where('modelo', 'like', "%{$valor}%");
+                        } elseif ($operador === 'starts') {
+                            $query->where('modelo', 'like', "{$valor}%");
+                        } elseif ($operador === 'ends') {
+                            $query->where('modelo', 'like', "%{$valor}");
+                        }
+                    }
+                    break;
+
+                case 'placa':
+                    if ($valor !== null && $valor !== '') {
+                        if ($operador === '=') {
+                            $query->where('placa', $valor);
+                        } elseif ($operador === 'like') {
+                            $query->where('placa', 'like', "%{$valor}%");
+                        }
+                    }
+                    break;
+
+                case 'ano':
+                    if ($operador === 'between' && $valorDe !== '' && $valorAte !== '') {
+                        $query->whereBetween('ano', [$valorDe, $valorAte]);
+                    } elseif ($valor !== '') {
+                        if ($operador === '=') {
+                            $query->where('ano', $valor);
+                        } elseif ($operador === '>') {
+                            $query->where('ano', '>', $valor);
+                        } elseif ($operador === '<') {
+                            $query->where('ano', '<', $valor);
+                        }
+                    }
+                    break;
+
+                case 'visibilidade':
+                    if ($valorVisibilidade !== null && $valorVisibilidade !== '') {
+                        $query->where('visibilidade', $valorVisibilidade);
+                    }
+                    break;
+
+                case 'vinculo':
+                    if ($valorVinculo === 'dono') {
+                        $query->where('usuario_dono_id', $user->id);
+                    } elseif ($valorVinculo === 'responsavel') {
+                        $query->whereHas('responsavel', fn($r) => 
+                            $r->where('usucodigo', $user->id)
+                        );
+                    }
+                    break;
+            }
+        }
+
+        // ===============================
+        // 🔄 ORDEM + PAGINAÇÃO
+        // ===============================
+        $veiculos = $query
+            ->orderBy('modelo')
+            ->paginate(9)
+            ->appends($request->query());
+
+        return view('veiculo.index_por_frota', compact(
+            'frota',
+            'veiculos',
+            'modoSomenteVisualizacao'
+        ));
     }
 
     /**

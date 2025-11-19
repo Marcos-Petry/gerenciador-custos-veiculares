@@ -269,24 +269,33 @@ private function aplicarFiltrosFrotas($query, Request $request, $user): void
     $campo    = $request->input('campo');
     $operador = $request->input('operador');
 
-    // Valor depende do campo selecionado na tela
-    if ($campo === 'visibilidade') {
+    // 🔥 Ajuste: pegar valor certo conforme o campo da VIEW
+    if (in_array($campo, ['nome', 'descricao'])) {
+        $valor = $request->input('valor');   // <-- VEIO DA VIEW ASSIM
+    } 
+    elseif ($campo === 'visibilidade') {
         $valor = $request->input('valor_visibilidade');
-    } elseif ($campo === 'vinculo') {
+    } 
+    elseif ($campo === 'vinculo') {
         $valor = $request->input('valor_vinculo');
-    } else {
-        $valor = $request->input('valor_texto');
+    } 
+    else {
+        return; // campo inválido
     }
 
-    if (!$campo || $valor === null || $valor === '') {
+    // Evita filtro vazio
+    if ($valor === null || $valor === '') {
         return;
     }
 
     switch ($campo) {
 
-        // 🔹 Nome / Descrição
+        // -----------------------------------
+        // 🔍 Nome ou Descrição
+        // -----------------------------------
         case 'nome':
         case 'descricao':
+
             if ($operador === 'like') {
                 $query->where($campo, 'like', "%{$valor}%");
             } elseif ($operador === 'starts') {
@@ -298,12 +307,16 @@ private function aplicarFiltrosFrotas($query, Request $request, $user): void
             }
             break;
 
-        // 🔹 Visibilidade
+        // -----------------------------------
+        // 🔍 Visibilidade
+        // -----------------------------------
         case 'visibilidade':
             $query->where('visibilidade', $valor);
             break;
 
-        // 🔹 Vínculo
+        // -----------------------------------
+        // 🔍 Vínculo
+        // -----------------------------------
         case 'vinculo':
             if ($valor === 'dono') {
                 $query->where('usuario_dono_id', $user->id);
@@ -315,5 +328,6 @@ private function aplicarFiltrosFrotas($query, Request $request, $user): void
             break;
     }
 }
+
 
 }

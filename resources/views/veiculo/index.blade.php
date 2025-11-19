@@ -16,55 +16,69 @@
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Campo</label>
                     <select name="campo" class="campo rounded-lg border-gray-300 px-3 py-1.5 w-44">
-                        <option value="modelo">Modelo</option>
-                        <option value="placa">Placa</option>
-                        <option value="ano">Ano</option>
-                        <option value="visibilidade">Visibilidade</option>
-                        <option value="vinculo">Vínculo</option>
+                        <option value="modelo" {{ request('campo') == 'modelo' ? 'selected' : '' }}>Modelo</option>
+                        <option value="placa" {{ request('campo') == 'placa' ? 'selected' : '' }}>Placa</option>
+                        <option value="ano" {{ request('campo') == 'ano' ? 'selected' : '' }}>Ano</option>
+                        <option value="visibilidade" {{ request('campo') == 'visibilidade' ? 'selected' : '' }}>Visibilidade</option>
+                        <option value="vinculo" {{ request('campo') == 'vinculo' ? 'selected' : '' }}>Vínculo</option>
                     </select>
                 </div>
 
                 <!-- Operador -->
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Operador</label>
-                    <select name="operador" class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"></select>
+                    <select name="operador"
+                            class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"
+                            data-old="{{ request('operador') }}">
+                    </select>
                 </div>
 
                 <!-- Valor -->
                 <div class="valor-container flex items-end gap-2">
+
                     <!-- Valor texto -->
                     <div class="valor-texto">
                         <label class="block text-white text-sm font-semibold mb-1">Valor</label>
-                        <input type="text" name="valor" placeholder="Digite o valor"
-                               class="rounded-lg border-gray-300 px-3 py-1.5 w-80">
+                        <input type="text" name="valor" value="{{ request('valor') }}"
+                               class="rounded-lg border-gray-300 px-3 py-1.5 w-80"
+                               placeholder="Digite o valor">
                     </div>
 
-                    <!-- Valor entre (ano) -->
+                    <!-- Valor ENTRE (Ano) -->
                     <div class="valor-entre hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Entre</label>
                         <div class="flex gap-2">
-                            <input type="number" name="valor_de" class="rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="De">
-                            <input type="number" name="valor_ate" class="rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="Até">
+                            <input type="number" name="valor_de" value="{{ request('valor_de') }}"
+                                   class="rounded-lg border-gray-300 px-3 py-1.5 w-28"
+                                   placeholder="De">
+
+                            <input type="number" name="valor_ate" value="{{ request('valor_ate') }}"
+                                   class="rounded-lg border-gray-300 px-3 py-1.5 w-28"
+                                   placeholder="Até">
                         </div>
                     </div>
 
                     <!-- Valor visibilidade -->
                     <div class="valor-visibilidade hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Visibilidade</label>
-                        <select name="valor_visibilidade" class="rounded-lg border-gray-300 px-3 py-1.5 w-44" disabled>
+                        <select name="valor_visibilidade"
+                                class="rounded-lg border-gray-300 px-3 py-1.5 w-44"
+                                {{ request('campo') == 'visibilidade' ? '' : 'disabled' }}>
                             <option value="">Selecione</option>
-                            <option value="1">Público</option>
-                            <option value="0">Privado</option>
+                            <option value="1" {{ request('valor_visibilidade') == '1' ? 'selected' : '' }}>Público</option>
+                            <option value="0" {{ request('valor_visibilidade') == '0' ? 'selected' : '' }}>Privado</option>
                         </select>
                     </div>
 
                     <!-- Valor vínculo -->
                     <div class="valor-vinculo hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Vínculo</label>
-                        <select name="valor_vinculo" class="rounded-lg border-gray-300 px-3 py-1.5 w-44" disabled>
+                        <select name="valor_vinculo"
+                                class="rounded-lg border-gray-300 px-3 py-1.5 w-44"
+                                {{ request('campo') == 'vinculo' ? '' : 'disabled' }}>
                             <option value="">Selecione</option>
-                            <option value="dono">Sou dono</option>
-                            <option value="responsavel">Sou responsável</option>
+                            <option value="dono" {{ request('valor_vinculo') == 'dono' ? 'selected' : '' }}>Sou dono</option>
+                            <option value="responsavel" {{ request('valor_vinculo') == 'responsavel' ? 'selected' : '' }}>Sou responsável</option>
                         </select>
                     </div>
                 </div>
@@ -72,14 +86,20 @@
                 <!-- Botões principais -->
                 <div class="flex items-end gap-2 botoes-principais">
                     <button type="button" id="add-filtro"
-                            class="flex items-center justify-center w-8 h-8 bg-green-600 text-white rounded-full hover:bg-green-700 transition text-lg font-bold">+</button>
+                        class="flex items-center justify-center w-8 h-8 bg-green-600 text-white rounded-full hover:bg-green-700 transition text-lg font-bold">+</button>
+
                     <button type="submit"
-                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Filtrar</button>
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        Filtrar
+                    </button>
+
                     <a href="{{ route('veiculo.index') }}"
-                       class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition">Limpar</a>
+                       class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition">
+                        Limpar
+                    </a>
                 </div>
 
-                <!-- Botão remover -->
+                <!-- Remover item -->
                 <button type="button"
                         class="remover-filtro hidden text-red-500 hover:text-red-700 text-lg font-bold">×</button>
             </div>
@@ -103,8 +123,9 @@
 
     @if($origemCampoExterno)
     <form id="form-selecao-veiculos" method="GET"
-      action="{{ request('frota_id') ? route('frota.edit', request('frota_id')) : route('frota.create') }}">
+          action="{{ request('frota_id') ? route('frota.edit', request('frota_id')) : route('frota.create') }}">
 
+        {{-- Manter filtros --}}
         @foreach(request()->except(['_token','origemCampoExterno']) as $key => $value)
             @if(is_array($value))
                 @foreach($value as $v)
@@ -116,13 +137,15 @@
         @endforeach
     @endif
 
-    <!-- Grid -->
+    <!-- GRID -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse($veiculos as $veiculo)
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden transform transition hover:shadow-2xl hover:-translate-y-2 hover:scale-[1.02]">
+
             @if($veiculo->foto)
             <div class="w-full h-40 bg-gray-100 flex items-center justify-center overflow-hidden">
-                <img src="{{ asset('storage/' . $veiculo->foto) }}" class="h-full w-auto object-cover" alt="Foto do veículo">
+                <img src="{{ asset('storage/'.$veiculo->foto) }}"
+                     class="h-full w-auto object-cover">
             </div>
             @else
             <div class="w-full h-40 flex items-center justify-center bg-gray-100 text-gray-400 text-5xl">🚗</div>
@@ -135,146 +158,71 @@
                 <p class="text-sm text-gray-600">Frota: {{ $veiculo->frota?->nome ?? '—' }}</p>
 
                 <p class="text-sm mt-2">
-                    <span class="px-2 py-1 rounded-full text-white text-xs font-medium {{ $veiculo->getVisibilidade() == 'Público' ? 'bg-green-500' : 'bg-red-500' }}">
-                        {{ $veiculo->getVisibilidade() }}
+                    <span class="px-2 py-1 rounded-full text-white text-xs font-medium
+                        {{ $veiculo->visibilidade == 1 ? 'bg-green-500' : 'bg-red-500' }}">
+                        {{ $veiculo->visibilidade == 1 ? 'Público' : 'Privado' }}
                     </span>
                 </p>
 
                 @if($origemCampoExterno)
                 <div class="mt-4 flex items-center">
-                    <input type="checkbox" name="veiculos[]" value="{{ $veiculo->veiculo_id }}" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <input type="checkbox"
+                        name="veiculos[]"
+                        value="{{ $veiculo->veiculo_id }}"
+                        class="h-4 w-4 text-blue-600 rounded">
                     <span class="ml-2 text-sm text-gray-600">Selecionar</span>
                 </div>
                 @else
                 <div class="flex flex-wrap justify-center mt-5 gap-x-6 gap-y-2 border-t pt-3 text-sm font-medium">
-                    <a href="{{ route('veiculo.show', $veiculo) }}" class="flex items-center text-blue-600 hover:text-blue-800 transition gap-1">👁 <span>Visualizar</span></a>
+                    <a href="{{ route('veiculo.show',$veiculo) }}"
+                        class="flex items-center text-blue-600 hover:text-blue-800 gap-1">
+                        👁 Visualizar
+                    </a>
 
                     @if($veiculo->usuario_dono_id === Auth::id())
-                    <a href="{{ route('veiculo.edit', $veiculo) }}" class="flex items-center text-yellow-600 hover:text-yellow-800 transition gap-1">✏ <span>Editar</span></a>
+                    <a href="{{ route('veiculo.edit',$veiculo) }}"
+                        class="flex items-center text-yellow-600 hover:text-yellow-800 gap-1">
+                        ✏ Editar
+                    </a>
 
-                    <form action="{{ route('veiculo.destroy', $veiculo) }}" method="POST" onsubmit="return confirm('Excluir veículo?')" class="inline">
+                    <form method="POST"
+                        action="{{ route('veiculo.destroy',$veiculo) }}"
+                        onsubmit="return confirm('Excluir veículo?')">
                         @csrf @method('DELETE')
-                        <button type="submit" class="flex items-center text-red-600 hover:text-red-800 transition gap-1">🗑 <span>Excluir</span></button>
+                        <button class="flex items-center text-red-600 hover:text-red-800 gap-1">
+                            🗑 Excluir
+                        </button>
                     </form>
                     @endif
 
-                    <a href="{{ route('veiculo.gastos.index', $veiculo->veiculo_id) }}" class="flex items-center text-green-600 hover:text-green-800 transition gap-1">💰 <span>Gastos</span></a>
+                    <a href="{{ route('veiculo.gastos.index',$veiculo->veiculo_id) }}"
+                        class="flex items-center text-green-600 hover:text-green-800 gap-1">
+                        💰 Gastos
+                    </a>
                 </div>
                 @endif
+
             </div>
         </div>
+
         @empty
-        <p class="col-span-3 text-center text-gray-500">Nenhum veículo cadastrado.</p>
+        <p class="col-span-3 text-center text-gray-500">Nenhum veículo encontrado.</p>
         @endforelse
     </div>
     </form>
 
-<!-- Paginação -->
-<div class="mt-6 text-sm text-gray-700">
-
-    {{-- 📌 Mobile (até 640px) --}}
-    <div class="flex flex-col items-center gap-3 sm:hidden">
-
-        <div class="bg-white/40 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/30 shadow-sm text-center">
-            Página <strong>{{ $veiculos->currentPage() }}</strong>
-            de <strong>{{ $veiculos->lastPage() }}</strong> —
-            <strong>{{ $veiculos->total() }}</strong> registros
-        </div>
-
-        <div class="w-full flex justify-center overflow-x-auto">
-            <div class="inline-flex gap-1 px-2 pb-1">
-
-                {{-- Anterior --}}
-                @if ($veiculos->onFirstPage())
-                    <span class="px-3 py-1 rounded-lg border border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed">
-                        «
-                    </span>
-                @else
-                    <a href="{{ $veiculos->previousPageUrl() }}"
-                       class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-50">
-                        «
-                    </a>
-                @endif
-
-                {{-- Páginas compactas --}}
-                @php
-                    $total   = $veiculos->lastPage();
-                    $current = $veiculos->currentPage();
-                    $range   = 2;
-                    $inicio  = max(1, $current - $range);
-                    $fim     = min($total, $current + $range);
-                @endphp
-
-                {{-- Primeira página --}}
-                @if ($inicio > 1)
-                    <a href="{{ $veiculos->url(1) }}" class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-50">
-                        1
-                    </a>
-
-                    @if ($inicio > 2)
-                        <span class="px-3 py-1">…</span>
-                    @endif
-                @endif
-
-                {{-- Intervalo central --}}
-                @for ($i = $inicio; $i <= $fim; $i++)
-                    @if ($i == $current)
-                        <span class="px-3 py-1 rounded-lg border border-blue-500 bg-blue-500 text-white font-semibold">
-                            {{ $i }}
-                        </span>
-                    @else
-                        <a href="{{ $veiculos->url($i) }}"
-                           class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-50">
-                            {{ $i }}
-                        </a>
-                    @endif
-                @endfor
-
-                {{-- Última página --}}
-                @if ($fim < $total)
-                    @if ($fim < $total - 1)
-                        <span class="px-3 py-1">…</span>
-                    @endif
-
-                    <a href="{{ $veiculos->url($total) }}"
-                       class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-50">
-                        {{ $total }}
-                    </a>
-                @endif
-
-                {{-- Próxima --}}
-                @if ($veiculos->hasMorePages())
-                    <a href="{{ $veiculos->nextPageUrl() }}"
-                       class="px-3 py-1 rounded-lg border border-gray-300 bg-white hover:bg-gray-50">
-                        »
-                    </a>
-                @else
-                    <span class="px-3 py-1 rounded-lg border border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed">
-                        »
-                    </span>
-                @endif
-
+    <!-- Paginação -->
+    <div class="mt-6 text-sm text-gray-700">
+        <div class="hidden sm:flex justify-between items-center">
+            <div class="bg-white/40 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/30 shadow-sm">
+                Página <strong>{{ $veiculos->currentPage() }}</strong>
+                de <strong>{{ $veiculos->lastPage() }}</strong> —
+                <strong>{{ $veiculos->total() }}</strong>
             </div>
-        </div>
 
+            <div>{{ $veiculos->onEachSide(1)->links() }}</div>
+        </div>
     </div>
-
-    {{-- 📌 Desktop (a partir de 640px) --}}
-    <div class="hidden sm:flex justify-between items-center">
-
-        <div class="bg-white/40 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/30 shadow-sm">
-            Página <strong>{{ $veiculos->currentPage() }}</strong>
-            de <strong>{{ $veiculos->lastPage() }}</strong> —
-            <strong>{{ $veiculos->total() }}</strong> registros
-        </div>
-
-        <div>
-            {{ $veiculos->onEachSide(1)->links() }}
-        </div>
-
-    </div>
-
-</div>
 
 </div>
 
@@ -297,75 +245,91 @@ const operadoresPorCampo = {
         { valor: '<', texto: 'Menor que (<)' },
         { valor: 'between', texto: 'Entre' },
     ],
-    visibilidade: [{ valor: '=', texto: 'Igual a (=)' }],
-    vinculo: [{ valor: '=', texto: 'Igual a (=)' }],
+    visibilidade: [ { valor: '=', texto: 'Igual a (=)' } ],
+    vinculo: [ { valor: '=', texto: 'Igual a (=)' } ],
 };
 
+// mostra só bloco específico
 function mostrarSomente(mostra, ...esconde) {
-    mostra.classList.remove('hidden');
-    const ativo = mostra.querySelector('input,select');
+    mostra.classList.remove("hidden");
+    const ativo = mostra.querySelector("input,select");
     if (ativo) ativo.disabled = false;
+
     esconde.forEach(e => {
-        e.classList.add('hidden');
-        const i = e.querySelector('input,select');
-        if (i) i.disabled = true;
+        e.classList.add("hidden");
+        const x = e.querySelector("input,select");
+        if (x) x.disabled = true;
     });
 }
 
+// lógica geral
 function atualizarLinha(item) {
-    const campo = item.querySelector('.campo');
-    const op = item.querySelector('.operador');
-    const vTexto = item.querySelector('.valor-texto');
-    const vEntre = item.querySelector('.valor-entre');
-    const vVisib = item.querySelector('.valor-visibilidade');
-    const vVinc  = item.querySelector('.valor-vinculo');
+    const campo = item.querySelector(".campo");
+    const operador = item.querySelector(".operador");
 
-    const operadorSelecionado = op.value;
+    const blocoTexto = item.querySelector(".valor-texto");
+    const blocoEntre = item.querySelector(".valor-entre");
+    const blocoVisib = item.querySelector(".valor-visibilidade");
+    const blocoVinc  = item.querySelector(".valor-vinculo");
 
-    op.innerHTML = '';
+    const operadorAnterior = operador.value;
+
+    operador.innerHTML = "";
     (operadoresPorCampo[campo.value] || []).forEach(o => {
-        const opt = document.createElement('option');
+        const opt = document.createElement("option");
         opt.value = o.valor;
         opt.textContent = o.texto;
-        op.appendChild(opt);
+        operador.appendChild(opt);
     });
 
-    if ([...op.options].some(opt => opt.value === operadorSelecionado)) {
-        op.value = operadorSelecionado;
+    if ([...operador.options].some(opt => opt.value === operadorAnterior)) {
+        operador.value = operadorAnterior;
     }
 
-    const opValue = op.value;
+    // lógica tipo de campo
+    if (campo.value === "visibilidade")
+        return mostrarSomente(blocoVisib, blocoTexto, blocoEntre, blocoVinc);
 
-    if (campo.value === 'visibilidade') mostrarSomente(vVisib, vTexto, vEntre, vVinc);
-    else if (campo.value === 'vinculo') mostrarSomente(vVinc, vTexto, vEntre, vVisib);
-    else if (campo.value === 'ano' && opValue === 'between') mostrarSomente(vEntre, vTexto, vVisib, vVinc);
-    else mostrarSomente(vTexto, vEntre, vVisib, vVinc);
+    if (campo.value === "vinculo")
+        return mostrarSomente(blocoVinc, blocoTexto, blocoEntre, blocoVisib);
+
+    if (campo.value === "ano" && operador.value === "between")
+        return mostrarSomente(blocoEntre, blocoTexto, blocoVisib, blocoVinc);
+
+    mostrarSomente(blocoTexto, blocoEntre, blocoVisib, blocoVinc);
 }
 
-document.addEventListener('change', e => {
-    const item = e.target.closest('.filtro-item');
+// inicializar primeira linha
+document.querySelectorAll(".filtro-item").forEach(atualizarLinha);
+
+// reatividade
+document.addEventListener("change", e => {
+    const item = e.target.closest(".filtro-item");
     if (!item) return;
-    if (e.target.classList.contains('campo') || e.target.classList.contains('operador')) atualizarLinha(item);
+
+    if (e.target.classList.contains("campo") ||
+        e.target.classList.contains("operador"))
+        atualizarLinha(item);
 });
 
-document.querySelectorAll('.filtro-item').forEach(atualizarLinha);
+// adicionar novo filtro
+document.getElementById("add-filtro").addEventListener("click", () => {
+    const container = document.getElementById("filtros-container");
+    const novo = container.querySelector(".filtro-item").cloneNode(true);
 
-document.getElementById('add-filtro').addEventListener('click', () => {
-    const container = document.getElementById('filtros-container');
-    const clone = container.querySelector('.filtro-item').cloneNode(true);
+    novo.querySelectorAll("input").forEach(i => (i.value = ""));
+    novo.querySelectorAll("select").forEach(s => (s.selectedIndex = 0));
 
-    clone.querySelectorAll('input').forEach(i => i.value = '');
-    clone.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
-
-    const botoes = clone.querySelector('.botoes-principais');
+    const botoes = novo.querySelector(".botoes-principais");
     if (botoes) botoes.remove();
 
-    const rm = clone.querySelector('.remover-filtro');
-    rm.classList.remove('hidden');
-    rm.onclick = () => clone.remove();
+    const rm = novo.querySelector(".remover-filtro");
+    rm.classList.remove("hidden");
+    rm.onclick = () => novo.remove();
 
-    atualizarLinha(clone);
-    container.appendChild(clone);
+    atualizarLinha(novo);
+    container.appendChild(novo);
 });
 </script>
+
 @endsection

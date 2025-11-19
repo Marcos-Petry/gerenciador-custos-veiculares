@@ -7,19 +7,19 @@
 @endphp
 
     <!-- 🔙 Botão Voltar -->
-<div class="mb-4">
-    <a href="{{ $somentePublico
-        ? route('frota.show', ['frota' => $frota->frota_id, 'from_publico' => 1])
-        : route('frota.show', $frota->frota_id) }}"
-        
-        class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition">
-        ← Voltar à Frota
-    </a>
-</div>
-
+    <div class="mb-4">
+        <a href="{{ $somentePublico
+            ? route('frota.show', ['frota' => $frota->frota_id, 'from_publico' => 1])
+            : route('frota.show', $frota->frota_id) }}"
+            class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition">
+            ← Voltar à Frota
+        </a>
+    </div>
 
     <!-- 🔹 Título -->
-    <h1 class="text-2xl font-bold text-white mb-6">🚗 Veículos da Frota: {{ $frota->nome }}</h1>
+    <h1 class="text-2xl font-bold text-white mb-6">
+        🚗 Veículos da Frota: {{ $frota->nome }}
+    </h1>
 
     <!-- 🔹 Filtros -->
     <form method="GET" id="form-filtros" class="flex flex-col gap-2 mb-3">
@@ -27,50 +27,62 @@
 
             <!-- Primeira linha -->
             <div class="filtro-item flex flex-wrap items-end gap-3">
+
                 <!-- Campo -->
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Campo</label>
                     <select name="campo" class="campo rounded-lg border-gray-300 px-3 py-1.5 w-44">
-                        <option value="modelo">Modelo</option>
-                        <option value="placa">Placa</option>
-                        <option value="ano">Ano</option>
-                        <option value="visibilidade">Visibilidade</option>
-                        <option value="vinculo">Vínculo</option>
+                        <option value="modelo"       {{ request('campo') == 'modelo' ? 'selected' : '' }}>Modelo</option>
+                        <option value="placa"        {{ request('campo') == 'placa' ? 'selected' : '' }}>Placa</option>
+                        <option value="ano"          {{ request('campo') == 'ano' ? 'selected' : '' }}>Ano</option>
+                        <option value="visibilidade" {{ request('campo') == 'visibilidade' ? 'selected' : '' }}>Visibilidade</option>
+                        <option value="vinculo"      {{ request('campo') == 'vinculo' ? 'selected' : '' }}>Vínculo</option>
                     </select>
                 </div>
 
                 <!-- Operador -->
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Operador</label>
-                    <select name="operador" class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"></select>
+                    <select name="operador"
+                            class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"
+                            data-old="{{ request('operador') }}">
+                    </select>
                 </div>
 
                 <!-- Valor -->
                 <div class="valor-container flex items-end gap-2">
+
                     <!-- Texto -->
                     <div class="valor-texto">
                         <label class="block text-white text-sm font-semibold mb-1">Valor</label>
-                        <input type="text" name="valor[]" placeholder="Digite o valor"
-                            class="rounded-lg border-gray-300 px-3 py-1.5 w-80">
+                        <input type="text"
+                               name="valor"
+                               value="{{ request('valor') }}"
+                               placeholder="Digite o valor"
+                               class="rounded-lg border-gray-300 px-3 py-1.5 w-80">
                     </div>
 
                     <!-- Visibilidade -->
                     <div class="valor-visibilidade hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Visibilidade</label>
-                        <select name="valor[]" class="rounded-lg border-gray-300 px-3 py-1.5 w-44" disabled>
+                        <select name="valor_visibilidade"
+                                class="rounded-lg border-gray-300 px-3 py-1.5 w-44"
+                                {{ request('campo') == 'visibilidade' ? '' : 'disabled' }}>
                             <option value="">Selecione</option>
-                            <option value="1">Público</option>
-                            <option value="0">Privado</option>
+                            <option value="1" {{ request('valor_visibilidade') == '1' ? 'selected' : '' }}>Público</option>
+                            <option value="0" {{ request('valor_visibilidade') == '0' ? 'selected' : '' }}>Privado</option>
                         </select>
                     </div>
 
                     <!-- Vínculo -->
                     <div class="valor-vinculo hidden">
                         <label class="block text-white text-sm font-semibold mb-1">Vínculo</label>
-                        <select name="valor[]" class="rounded-lg border-gray-300 px-3 py-1.5 w-44" disabled>
+                        <select name="valor_vinculo"
+                                class="rounded-lg border-gray-300 px-3 py-1.5 w-44"
+                                {{ request('campo') == 'vinculo' ? '' : 'disabled' }}>
                             <option value="">Selecione</option>
-                            <option value="dono">Sou dono</option>
-                            <option value="responsavel">Sou responsável</option>
+                            <option value="dono"        {{ request('valor_vinculo') == 'dono' ? 'selected' : '' }}>Sou dono</option>
+                            <option value="responsavel" {{ request('valor_vinculo') == 'responsavel' ? 'selected' : '' }}>Sou responsável</option>
                         </select>
                     </div>
                 </div>
@@ -136,110 +148,113 @@
         @endforelse
     </div>
 
-<!-- Paginação -->
-<div class="mt-6 text-sm text-gray-700">
+    <!-- Paginação -->
+    <div class="mt-6 text-sm text-gray-700">
 
-    {{-- 📌 Mobile (até 640px) --}}
-    <div class="flex flex-col items-center gap-3 sm:hidden">
+        {{-- 📌 Mobile (até 640px) --}}
+        <div class="flex flex-col items-center gap-3 sm:hidden">
 
-        <div class="bg-white/40 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/30 shadow-sm text-center">
-            Página <strong>{{ $veiculos->currentPage() }}</strong>
-            de <strong>{{ $veiculos->lastPage() }}</strong> —
-            <strong>{{ $veiculos->total() }}</strong> registros
-        </div>
+            <div class="bg-white/40 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/30 shadow-sm text-center">
+                Página <strong>{{ $veiculos->currentPage() }}</strong>
+                de <strong>{{ $veiculos->lastPage() }}</strong> —
+                <strong>{{ $veiculos->total() }}</strong> registros
+            </div>
 
-        <div class="w-full flex justify-center overflow-x-auto">
-            <div class="inline-flex gap-1 px-2 pb-1">
+            <div class="w-full flex justify-center overflow-x-auto">
+                <div class="inline-flex gap-1 px-2 pb-1">
 
-                {{-- Anterior --}}
-                @if ($veiculos->onFirstPage())
-                    <span class="px-3 py-1 rounded-lg border border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed">
-                        «
-                    </span>
-                @else
-                    <a href="{{ $veiculos->previousPageUrl() }}"
-                       class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-50">
-                        «
-                    </a>
-                @endif
-
-                {{-- Compact pages --}}
-                @php
-                    $total   = $veiculos->lastPage();
-                    $current = $veiculos->currentPage();
-                    $range   = 2;
-                    $inicio  = max(1, $current - $range);
-                    $fim     = min($total, $current + $range);
-                @endphp
-
-                {{-- Primeira página --}}
-                @if ($inicio > 1)
-                    <a href="{{ $veiculos->url(1) }}"
-                       class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-50">1</a>
-
-                    @if ($inicio > 2)
-                        <span class="px-3 py-1">…</span>
-                    @endif
-                @endif
-
-                {{-- Intervalo central --}}
-                @for ($i = $inicio; $i <= $fim; $i++)
-                    @if ($i == $current)
-                        <span class="px-3 py-1 rounded-lg border border-blue-500 bg-blue-500 text-white font-semibold">
-                            {{ $i }}
+                    {{-- Anterior --}}
+                    @if ($veiculos->onFirstPage())
+                        <span class="px-3 py-1 rounded-lg border border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed">
+                            «
                         </span>
                     @else
-                        <a href="{{ $veiculos->url($i) }}"
-                           class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-50">
-                            {{ $i }}
+                        <a href="{{ $veiculos->previousPageUrl() }}"
+                        class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-50">
+                            «
                         </a>
                     @endif
-                @endfor
 
-                {{-- Última página --}}
-                @if ($fim < $total)
-                    @if ($fim < $total - 1)
-                        <span class="px-3 py-1">…</span>
+                    {{-- Páginas compactas --}}
+                    @php
+                        $total   = $veiculos->lastPage();
+                        $current = $veiculos->currentPage();
+                        $range   = 2;
+                        $inicio  = max(1, $current - $range);
+                        $fim     = min($total, $current + $range);
+                    @endphp
+
+                    {{-- Primeira página --}}
+                    @if ($inicio > 1)
+                        <a href="{{ $veiculos->url(1) }}"
+                        class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-50">
+                            1
+                        </a>
+
+                        @if ($inicio > 2)
+                            <span class="px-3 py-1">…</span>
+                        @endif
                     @endif
 
-                    <a href="{{ $veiculos->url($total) }}"
-                       class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-50">
-                        {{ $total }}
-                    </a>
-                @endif
+                    {{-- Intervalo central --}}
+                    @for ($i = $inicio; $i <= $fim; $i++)
+                        @if ($i == $current)
+                            <span class="px-3 py-1 rounded-lg border border-blue-500 bg-blue-500 text-white font-semibold">
+                                {{ $i }}
+                            </span>
+                        @else
+                            <a href="{{ $veiculos->url($i) }}"
+                            class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-50">
+                                {{ $i }}
+                            </a>
+                        @endif
+                    @endfor
 
-                {{-- Próxima --}}
-                @if ($veiculos->hasMorePages())
-                    <a href="{{ $veiculos->nextPageUrl() }}"
-                       class="px-3 py-1 rounded-lg border border-gray-300 bg-white hover:bg-gray-50">
-                        »
-                    </a>
-                @else
-                    <span class="px-3 py-1 rounded-lg border border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed">
-                        »
-                    </span>
-                @endif
+                    {{-- Última página --}}
+                    @if ($fim < $total)
+                        @if ($fim < $total - 1)
+                            <span class="px-3 py-1">…</span>
+                        @endif
 
+                        <a href="{{ $veiculos->url($total) }}"
+                        class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-50">
+                            {{ $total }}
+                        </a>
+                    @endif
+
+                    {{-- Próxima --}}
+                    @if ($veiculos->hasMorePages())
+                        <a href="{{ $veiculos->nextPageUrl() }}"
+                        class="px-3 py-1 rounded-lg border border-gray-300 bg-white hover:bg-gray-50">
+                            »
+                        </a>
+                    @else
+                        <span class="px-3 py-1 rounded-lg border border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed">
+                            »
+                        </span>
+                    @endif
+
+                </div>
             </div>
+
+        </div>
+
+        {{-- 📌 Desktop (a partir de 640px) --}}
+        <div class="hidden sm:flex justify-between items-center">
+
+            <div class="bg-white/40 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/30 shadow-sm">
+                Página <strong>{{ $veiculos->currentPage() }}</strong>
+                de <strong>{{ $veiculos->lastPage() }}</strong> —
+                <strong>{{ $veiculos->total() }}</strong> registros
+            </div>
+
+            <div>
+                {{ $veiculos->onEachSide(1)->links() }}
+            </div>
+
         </div>
 
     </div>
-
-    {{-- 📌 Desktop (a partir de 640px) --}}
-    <div class="hidden sm:flex justify-between items-center">
-
-        <div class="bg-white/40 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/30 shadow-sm">
-            Página <strong>{{ $veiculos->currentPage() }}</strong>
-            de <strong>{{ $veiculos->lastPage() }}</strong> —
-            <strong>{{ $veiculos->total() }}</strong> registros
-        </div>
-
-        <div>
-            {{ $veiculos->onEachSide(1)->links() }}
-        </div>
-    </div>
-
-</div>
 
 </div>
 
@@ -278,18 +293,25 @@ function mostrarSomente(mostra, ...esconde) {
 
 function atualizarLinha(item) {
     const campo = item.querySelector('.campo');
-    const op = item.querySelector('.operador');
+    const opSel = item.querySelector('.operador');
     const vTexto = item.querySelector('.valor-texto');
     const vVisib = item.querySelector('.valor-visibilidade');
     const vVinc  = item.querySelector('.valor-vinculo');
 
-    op.innerHTML = '';
+    const operadorAnterior = opSel.dataset.old || opSel.value;
+
+    opSel.innerHTML = '';
     (operadoresPorCampo[campo.value] || []).forEach(o => {
         const opt = document.createElement('option');
         opt.value = o.valor;
         opt.textContent = o.texto;
-        op.appendChild(opt);
+        opSel.appendChild(opt);
     });
+
+    if ([...opSel.options].some(opt => opt.value === operadorAnterior)) {
+        opSel.value = operadorAnterior;
+    }
+    opSel.dataset.old = '';
 
     if (campo.value === 'visibilidade') {
         mostrarSomente(vVisib, vTexto, vVinc);
@@ -301,17 +323,32 @@ function atualizarLinha(item) {
 }
 
 document.querySelectorAll('.filtro-item').forEach(atualizarLinha);
+
 document.addEventListener('change', e => {
-    if (e.target.classList.contains('campo'))
-        atualizarLinha(e.target.closest('.filtro-item'));
+    const item = e.target.closest('.filtro-item');
+    if (!item) return;
+
+    if (e.target.classList.contains('campo') ||
+        e.target.classList.contains('operador')) {
+        atualizarLinha(item);
+    }
 });
 
 document.getElementById('add-filtro').addEventListener('click', () => {
     const container = document.getElementById('filtros-container');
-    const clone = container.querySelector('.filtro-item').cloneNode(true);
+    const base = container.querySelector('.filtro-item');
+    const clone = base.cloneNode(true);
 
     clone.querySelectorAll('input').forEach(i => i.value = '');
-    clone.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+    clone.querySelectorAll('select').forEach(s => {
+        s.selectedIndex = 0;
+        if (s.classList.contains('operador')) {
+            s.dataset.old = '';
+        }
+        if (s.name === 'valor_visibilidade' || s.name === 'valor_vinculo') {
+            s.disabled = true;
+        }
+    });
 
     const botoes = clone.querySelector('.botoes-principais');
     if (botoes) botoes.remove();
@@ -324,4 +361,5 @@ document.getElementById('add-filtro').addEventListener('click', () => {
     container.appendChild(clone);
 });
 </script>
+
 @endsection

@@ -86,7 +86,7 @@ class PublicoController extends Controller
                 case 'frota_nome':
                     if ($valor !== null && $valor !== '') {
                         if ($operador === 'like') {
-                            $q->where($campo, 'ILIKE', "%{$valor}%");
+                            $q->where($campo, 'LIKE', "%{$valor}%");
                         } elseif (in_array($operador, ['=', '>', '<'])) {
                             $q->where($campo, $operador, $valor);
                         }

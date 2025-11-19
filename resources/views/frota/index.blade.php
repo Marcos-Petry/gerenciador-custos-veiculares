@@ -9,48 +9,75 @@
     <form method="GET" id="form-filtros" class="flex flex-col gap-2 mb-3">
         <div id="filtros-container" class="flex flex-col gap-3">
             <div class="filtro-item flex flex-wrap items-end gap-3">
+
+                <!-- Campo -->
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Campo</label>
                     <select name="campo" class="campo rounded-lg border-gray-300 px-3 py-1.5 w-44">
-                        <option value="nome">Nome</option>
-                        <option value="descricao">Descrição</option>
-                        <option value="visibilidade">Visibilidade</option>
-                        <option value="vinculo">Vínculo</option>
+                        <option value="nome"         {{ request('campo') == 'nome' ? 'selected' : '' }}>Nome</option>
+                        <option value="descricao"    {{ request('campo') == 'descricao' ? 'selected' : '' }}>Descrição</option>
+                        <option value="visibilidade" {{ request('campo') == 'visibilidade' ? 'selected' : '' }}>Visibilidade</option>
+                        <option value="vinculo"      {{ request('campo') == 'vinculo' ? 'selected' : '' }}>Vínculo</option>
                     </select>
                 </div>
 
+                <!-- Operador -->
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Operador</label>
-                    <select name="operador" class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"></select>
+                    <select name="operador"
+                            class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"
+                            data-old="{{ request('operador') }}">
+                    </select>
                 </div>
 
+                <!-- Valor texto -->
                 <div class="valor-texto">
                     <label class="block text-white text-sm font-semibold mb-1">Valor</label>
-                    <input type="text" name="valor_texto"
-                        class="inp-texto rounded-lg border-gray-300 px-3 py-1.5 w-80">
+                    <input type="text"
+                           name="valor"
+                           value="{{ request('valor') }}"
+                           class="inp-texto rounded-lg border-gray-300 px-3 py-1.5 w-80">
                 </div>
 
+                <!-- Visibilidade -->
                 <div class="valor-visibilidade hidden">
                     <label class="block text-white text-sm font-semibold mb-1">Visibilidade</label>
                     <select name="valor_visibilidade"
-                        class="sel-visibilidade rounded-lg border-gray-300 px-3 py-1.5 w-44" disabled>
+                            class="sel-visibilidade rounded-lg border-gray-300 px-3 py-1.5 w-44"
+                            {{ request('campo') == 'visibilidade' ? '' : 'disabled' }}>
+
                         <option value="">Selecione</option>
-                        <option value="1">Pública</option>
-                        <option value="0">Privada</option>
+
+                        <option value="1" {{ request('valor_visibilidade') == '1' ? 'selected' : '' }}>
+                            Pública
+                        </option>
+
+                        <option value="0" {{ request('valor_visibilidade') == '0' ? 'selected' : '' }}>
+                            Privada
+                        </option>
                     </select>
                 </div>
 
+                <!-- Vínculo -->
                 <div class="valor-vinculo hidden">
                     <label class="block text-white text-sm font-semibold mb-1">Vínculo</label>
                     <select name="valor_vinculo"
-                        class="sel-vinculo rounded-lg border-gray-300 px-3 py-1.5 w-44" disabled>
+                            class="sel-vinculo rounded-lg border-gray-300 px-3 py-1.5 w-44"
+                            {{ request('campo') == 'vinculo' ? '' : 'disabled' }}>
+
                         <option value="">Selecione</option>
-                        <option value="dono">Sou dono</option>
-                        <option value="responsavel">Sou responsável</option>
+
+                        <option value="dono" {{ request('valor_vinculo') == 'dono' ? 'selected' : '' }}>
+                            Sou dono
+                        </option>
+
+                        <option value="responsavel" {{ request('valor_vinculo') == 'responsavel' ? 'selected' : '' }}>
+                            Sou responsável
+                        </option>
                     </select>
                 </div>
 
-
+                <!-- Botões -->
                 <div class="flex items-end gap-2 botoes-principais">
                     <button type="button" id="add-filtro"
                         class="flex items-center justify-center w-8 h-8 bg-green-600 text-white rounded-full hover:bg-green-700 transition text-lg font-bold">+</button>
@@ -167,7 +194,7 @@
 <div class="mt-6 text-sm text-gray-700">
 
     {{-- 📌 Mobile (até 640px) --}}
-    <div class="flex flex-col items-center gap-3 sm:hidden">
+    <div class="flex flex-col items_center gap-3 sm:hidden">
 
         <div class="bg-white/40 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/30 shadow-sm text-center">
             Página <strong>{{ $frotas->currentPage() }}</strong>
@@ -186,7 +213,6 @@
                        class="px-3 py-1 rounded-lg border bg-white hover:bg-gray-50">«</a>
                 @endif
 
-                {{-- Páginas compactas --}}
                 @php
                     $total   = $frotas->lastPage();
                     $current = $frotas->currentPage();
@@ -238,7 +264,6 @@
 
     </div>
 
-
     {{-- 📌 Desktop (a partir de 640px) --}}
     <div class="hidden sm:flex justify-between items-center">
 
@@ -261,46 +286,29 @@
 <!-- 🔸 Script -->
 <script>
     const operadoresPorCampo = {
-        nome: [{
-                valor: '=',
-                texto: 'Igual a (=)'
-            },
-            {
-                valor: 'like',
-                texto: 'Contém'
-            },
-            {
-                valor: 'starts',
-                texto: 'Começa com'
-            },
-            {
-                valor: 'ends',
-                texto: 'Termina com'
-            },
+        nome: [
+            { valor: '=',    texto: 'Igual a (=)' },
+            { valor: 'like', texto: 'Contém' },
+            { valor: 'starts', texto: 'Começa com' },
+            { valor: 'ends',   texto: 'Termina com' },
         ],
-        descricao: [{
-                valor: '=',
-                texto: 'Igual a (=)'
-            },
-            {
-                valor: 'like',
-                texto: 'Contém'
-            },
+        descricao: [
+            { valor: '=',    texto: 'Igual a (=)' },
+            { valor: 'like', texto: 'Contém' },
         ],
-        visibilidade: [{
-            valor: '=',
-            texto: 'Igual a (=)'
-        }],
-        vinculo: [{
-            valor: '=',
-            texto: 'Igual a (=)'
-        }],
+        visibilidade: [
+            { valor: '=', texto: 'Igual a (=)' },
+        ],
+        vinculo: [
+            { valor: '=', texto: 'Igual a (=)' },
+        ],
     };
 
     function mostrarSomente(elMostra, ...elEsconde) {
         elMostra.classList.remove('hidden');
         const inputMostra = elMostra.querySelector('input, select');
         if (inputMostra) inputMostra.disabled = false;
+
         elEsconde.forEach(el => {
             el.classList.add('hidden');
             const inp = el.querySelector('input, select');
@@ -310,11 +318,16 @@
 
     function atualizarLinha(item) {
         const campoSel = item.querySelector('.campo');
-        const opSel = item.querySelector('.operador');
+        const opSel    = item.querySelector('.operador');
+
         const vTexto = item.querySelector('.valor-texto');
         const vVisib = item.querySelector('.valor-visibilidade');
-        const vVinc = item.querySelector('.valor-vinculo');
+        const vVinc  = item.querySelector('.valor-vinculo');
 
+        // guarda operador anterior (caso usuário troque)
+        const operadorAnterior = opSel.value;
+
+        // recria operadores
         opSel.innerHTML = '';
         (operadoresPorCampo[campoSel.value] || []).forEach(op => {
             const o = document.createElement('option');
@@ -323,36 +336,82 @@
             opSel.appendChild(o);
         });
 
-        if (campoSel.value === 'visibilidade') mostrarSomente(vVisib, vTexto, vVinc);
-        else if (campoSel.value === 'vinculo') mostrarSomente(vVinc, vTexto, vVisib);
-        else mostrarSomente(vTexto, vVisib, vVinc);
+        // restaura do request só na primeira vez
+        if (opSel.dataset.old && !item.dataset.iniciado) {
+            opSel.value = opSel.dataset.old;
+        }
+        item.dataset.iniciado = 'true';
+
+        // se o operador anterior ainda existir, mantém
+        if ([...opSel.options].some(opt => opt.value === operadorAnterior)) {
+            opSel.value = operadorAnterior;
+        }
+
+        // show/hide blocos
+        if (campoSel.value === 'visibilidade') {
+            return mostrarSomente(vVisib, vTexto, vVinc);
+        }
+
+        if (campoSel.value === 'vinculo') {
+            return mostrarSomente(vVinc, vTexto, vVisib);
+        }
+
+        // default texto
+        mostrarSomente(vTexto, vVisib, vVinc);
     }
 
+    // inicializa filtro principal com valores do request
     document.querySelectorAll('.filtro-item').forEach(atualizarLinha);
 
+    // atualiza quando muda campo OU operador
     document.addEventListener('change', e => {
-        if (e.target.classList.contains('campo')) {
-            atualizarLinha(e.target.closest('.filtro-item'));
+        const item = e.target.closest('.filtro-item');
+        if (!item) return;
+
+        if (e.target.classList.contains('campo') ||
+            e.target.classList.contains('operador')) {
+            atualizarLinha(item);
         }
     });
 
+    // clonar filtros (sem persistir valores)
     document.getElementById('add-filtro').addEventListener('click', () => {
         const container = document.getElementById('filtros-container');
         const base = container.querySelector('.filtro-item');
         const clone = base.cloneNode(true);
-        clone.querySelectorAll('input').forEach(i => (i.value = ''));
-        clone.querySelectorAll('select').forEach(s => (s.selectedIndex = 0));
+
+        // limpa inputs
+        clone.querySelectorAll('input').forEach(i => {
+            i.value = '';
+            i.disabled = false;
+        });
+
+        // reseta selects: só o campo continua como "Nome"
+        const campoSelect = clone.querySelector('.campo');
+        if (campoSelect) campoSelect.selectedIndex = 0;
+
+        clone.querySelectorAll('select').forEach(s => {
+            if (s !== campoSelect) {
+                s.selectedIndex = 0;
+                s.dataset.old = ''; // não reaproveita valor do filtro principal
+            }
+        });
+
         const botoes = clone.querySelector('.botoes-principais');
         if (botoes) botoes.remove();
+
         const remover = clone.querySelector('.remover-filtro');
         remover.classList.remove('hidden');
         remover.onclick = () => clone.remove();
+
+        clone.dataset.iniciado = 'false';
         atualizarLinha(clone);
+
         container.appendChild(clone);
     });
 
     // ===============================
-    // 🔹 NOVO BLOCO: Confirma Seleção
+    // 🔹 Confirma Seleção (externo)
     // ===============================
     document.getElementById('confirmarSelecao')?.addEventListener('click', () => {
         const selecionado = document.querySelector('input[name="frota_id"]:checked');
@@ -368,7 +427,6 @@
 
         urlParams.set('frota_id', frotaId);
 
-        // Usa helpers do Laravel para respeitar o caminho /public
         let destino;
         if (from === 'edit' && veiculoId) {
             destino = `{{ url('veiculo') }}/${veiculoId}/edit`;

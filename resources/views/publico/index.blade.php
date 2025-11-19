@@ -13,19 +13,19 @@
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Campo</label>
                     <select name="campo" class="campo rounded-lg border-gray-300 px-3 py-1.5 w-52">
-                        <option value="titulo">Nome/Modelo</option>
-                        <option value="placa">Placa</option>
-                        <option value="ano">Ano</option>
-                        <option value="frota_nome">Nome da Frota</option>
-                        <option value="tipoFiltro">Tipo (Veículo/Frota)</option>
-                        <option value="relacionamentoFiltro">Relacionamento (Com/Sem Frota)</option>
+                        <option value="titulo"              {{ request('campo') == 'titulo' ? 'selected' : '' }}>Nome/Modelo</option>
+                        <option value="placa"               {{ request('campo') == 'placa' ? 'selected' : '' }}>Placa</option>
+                        <option value="ano"                 {{ request('campo') == 'ano' ? 'selected' : '' }}>Ano</option>
+                        <option value="frota_nome"          {{ request('campo') == 'frota_nome' ? 'selected' : '' }}>Nome da Frota</option>
+                        <option value="tipoFiltro"          {{ request('campo') == 'tipoFiltro' ? 'selected' : '' }}>Tipo (Veículo/Frota)</option>
+                        <option value="relacionamentoFiltro"{{ request('campo') == 'relacionamentoFiltro' ? 'selected' : '' }}>Relacionamento (Com/Sem Frota)</option>
                     </select>
                 </div>
 
                 <!-- Operador -->
                 <div>
                     <label class="block text-white text-sm font-semibold mb-1">Operador</label>
-                    <select name="operador" class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48"></select>
+                    <select name="operador" class="operador rounded-lg border-gray-300 px-3 py-1.5 w-48" data-old="{{ request('operador') }}"></select>
                 </div>
 
                 <!-- Valores -->
@@ -35,6 +35,7 @@
                     <div class="valor-texto">
                         <label class="block text-white text-sm font-semibold mb-1">Valor</label>
                         <input type="text"
+                            value="{{ request('valor') }}"
                             name="valor" class="inp-texto rounded-lg border-gray-300 px-3 py-1.5 w-80"
                             placeholder="Digite o valor">
                     </div>
@@ -44,29 +45,56 @@
                         <label class="block text-white text-sm font-semibold mb-1">Entre</label>
                         <div class="flex gap-2">
                         <input type="number" name="valor_de"
+                            value="{{ request('valor_de') }}"
                             class="inp-de rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="De">
                         <input type="number" name="valor_ate"
+                            value="{{ request('valor_ate') }}"
                             class="inp-ate rounded-lg border-gray-300 px-3 py-1.5 w-28" placeholder="Até">
                         </div>
                     </div>
 
                     <!-- Tipo -->
-                    <div class="valor-tipo hidden">
+                    <div class="valor-tipo {{ request('campo') == 'tipoFiltro' ? '' : 'hidden' }}">
                         <label class="block text-white text-sm font-semibold mb-1">Tipo</label>
-                        <select name="tipoFiltro" class="sel-tipo rounded-lg border-gray-300 px-3 py-1.5 w-52" disabled>
+
+                        <select name="tipoFiltro"
+                                class="sel-tipo rounded-lg border-gray-300 px-3 py-1.5 w-52"
+                                {{ request('campo') == 'tipoFiltro' ? '' : 'disabled' }}>
+
                             <option value="">Selecione</option>
-                            <option value="veiculo">Veículo</option>
-                            <option value="frota">Frota</option>
+
+                            <option value="veiculo"
+                                {{ request('tipoFiltro') == 'veiculo' ? 'selected' : '' }}>
+                                Veículo
+                            </option>
+
+                            <option value="frota"
+                                {{ request('tipoFiltro') == 'frota' ? 'selected' : '' }}>
+                                Frota
+                            </option>
+
                         </select>
                     </div>
-
                     <!-- Relacionamento -->
-                    <div class="valor-relacionamento hidden">
+                    <div class="valor-relacionamento {{ request('campo') == 'relacionamentoFiltro' ? '' : 'hidden' }}">
                         <label class="block text-white text-sm font-semibold mb-1">Relacionamento</label>
-                        <select name="relacionamentoFiltro" class="sel-relacionamento rounded-lg border-gray-300 px-3 py-1.5 w-64" disabled>
+
+                        <select name="relacionamentoFiltro"
+                                class="sel-relacionamento rounded-lg border-gray-300 px-3 py-1.5 w-64"
+                                {{ request('campo') == 'relacionamentoFiltro' ? '' : 'disabled' }}>
+
                             <option value="">Selecione</option>
-                            <option value="com_frota">Com Frota</option>
-                            <option value="sem_frota">Sem Frota</option>
+
+                            <option value="com_frota"
+                                {{ request('relacionamentoFiltro') == 'com_frota' ? 'selected' : '' }}>
+                                Com Frota
+                            </option>
+
+                            <option value="sem_frota"
+                                {{ request('relacionamentoFiltro') == 'sem_frota' ? 'selected' : '' }}>
+                                Sem Frota
+                            </option>
+
                         </select>
                     </div>
                 </div>
@@ -301,6 +329,13 @@ function atualizarLinha(item) {
     });
     if ([...operador.options].some(opt => opt.value === operadorSelecionado)) operador.value = operadorSelecionado;
 
+    // Mantém valor anterior do operador
+    if (operador.dataset.old && !item.dataset.iniciado) {
+        operador.value = operador.dataset.old;
+    }
+    item.dataset.iniciado = true;
+
+
     const op = operador.value;
 
     if (campo.value === 'ano' && op === 'between') mostrarSomente(vEntre, vTexto, vTipo, vRel);
@@ -317,17 +352,41 @@ document.addEventListener('change', e => {
 
 document.getElementById('add-filtro').addEventListener('click', () => {
     const container = document.getElementById('filtros-container');
-    const clone = container.querySelector('.filtro-item').cloneNode(true);
-    clone.querySelectorAll('input').forEach(i => i.value = '');
-    clone.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+    const original = container.querySelector('.filtro-item');
+    const clone = original.cloneNode(true);
+
+    // Limpa somente inputs de texto/número
+    clone.querySelectorAll('input').forEach(i => {
+        i.value = '';
+        i.disabled = false;
+    });
+
+    // Reseta SOMENTE o select "campo"
+    const campoSelect = clone.querySelector('.campo');
+    if (campoSelect) campoSelect.selectedIndex = 0;
+
+    // Evita restaurar valores antigos nos selects do clone
+    clone.querySelectorAll('select').forEach(s => {
+        if (s !== campoSelect) {
+            s.dataset.old = ""; // não deixa operador/tipo/relacionamento puxar valor salvo
+        }
+    });
+
+    // Remove botões principais (Filtrar/Limpar) e mantém só o "X"
     const botoes = clone.querySelector('.botoes-principais');
     if (botoes) botoes.remove();
+
     const rm = clone.querySelector('.remover-filtro');
     rm.classList.remove('hidden');
     rm.onclick = () => clone.remove();
+
+    // Marca como não iniciado para o operador restaurar corretamente o primeiro filtro
+    clone.dataset.iniciado = false;
     atualizarLinha(clone);
+
     container.appendChild(clone);
 });
+
 
 document.querySelectorAll('.filtro-item').forEach(atualizarLinha);
 </script>
