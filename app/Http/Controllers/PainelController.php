@@ -50,24 +50,32 @@ class PainelController extends Controller
         // ============================================================
         // 🔹 GASTOS MENSAIS → GRÁFICO DE COLUNAS
         // ============================================================
-        $gastosMensais = Gasto::select(
+        $gastosMensaisBrutos = Gasto::select(
             DB::raw('EXTRACT(MONTH FROM data_gasto) as mes'),
             DB::raw('SUM(valor) as total')
         )
-            ->whereIn('veiculo_id', $veiculosIds)
-            ->where('data_gasto', '>=', Carbon::now()->subMonths(5)->startOfMonth())
-            ->groupBy('mes')
-            ->orderBy('mes')
-            ->get();
+        ->whereIn('veiculo_id', $veiculosIds)
+        ->where('data_gasto', '>=', Carbon::now()->subMonths(4)->startOfMonth())
+        ->groupBy('mes')
+        ->orderBy('mes')
+        ->get()
+        ->keyBy('mes');
 
+        // Montar último 5 meses mesmo sem gasto
         $labels = [];
         $valores = [];
 
-        foreach ($gastosMensais as $gasto) {
-            $mesNumero = intval($gasto->mes);
-            $labels[] = ucfirst(Carbon::create(null, $mesNumero)->translatedFormat('M'));
-            $valores[] = floatval($gasto->total);
+        for ($i = 4; $i >= 0; $i--) {
+            $mesCarbon = Carbon::now()->subMonths($i);
+            $mesNumero = intval($mesCarbon->format('m'));
+
+            $labels[] = ucfirst($mesCarbon->translatedFormat('M'));
+
+            $valores[] = isset($gastosMensaisBrutos[$mesNumero])
+                ? floatval($gastosMensaisBrutos[$mesNumero]->total)
+                : 0;
         }
+
 
         // ============================================================
         // 🔹 DISTRIBUIÇÃO POR CATEGORIA (GRÁFICO HORIZONTAL)
