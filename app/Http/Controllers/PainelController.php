@@ -16,14 +16,14 @@ class PainelController extends Controller
     public function index()
     {
         $usuarioId = Auth::id();
-        $usuarioCodigo = Auth::user()->id; // pivot usa ID da tabela users
+        $usuarioCodigo = Auth::user()->id;
 
         // ============================================================
         // 🔹 BUSCA TODOS OS VEÍCULOS DO USUÁRIO (DONO + RESPONSÁVEL)
         // ============================================================
         $veiculosIds = Veiculo::where('usuario_dono_id', $usuarioId)
             ->orWhereHas('responsavel', fn($q) => $q->where('usucodigo', $usuarioCodigo))
-            ->pluck('veiculo_id');   // ✔ PK REAL do veículo
+            ->pluck('veiculo_id');
 
         // ============================================================
         // 🔹 CONTAGEM DE VEÍCULOS E FROTAS
@@ -41,41 +41,45 @@ class PainelController extends Controller
         })->count();
 
         // ============================================================
-        // 🔹 TOTAL GASTO (ÚLTIMOS 5 MESES)
+        // 🔹 TOTAL DE GASTOS (ÚLTIMOS 5 MESES)
         // ============================================================
         $gastosMes = Gasto::whereIn('veiculo_id', $veiculosIds)
             ->where('data_gasto', '>=', Carbon::now()->subMonths(4)->startOfMonth())
             ->sum('valor');
 
         // ============================================================
-        // 🔹 GASTOS MENSAIS → GRÁFICO DE COLUNAS
+        // 🔹 GASTOS MENSAIS (CORRIGIDO: USA ANO + MÊS)
         // ============================================================
         $gastosMensaisBrutos = Gasto::select(
-            DB::raw('EXTRACT(MONTH FROM data_gasto) as mes'),
-            DB::raw('SUM(valor) as total')
+            DB::raw("TO_CHAR(data_gasto, 'YYYY-MM') as ano_mes"),
+            DB::raw("SUM(valor) as total")
         )
         ->whereIn('veiculo_id', $veiculosIds)
         ->where('data_gasto', '>=', Carbon::now()->subMonths(4)->startOfMonth())
-        ->groupBy('mes')
-        ->orderBy('mes')
+        ->groupBy('ano_mes')
+        ->orderBy('ano_mes')
         ->get()
-        ->keyBy('mes');
+        ->keyBy('ano_mes'); // evita conflitos (ex: Outubro 2024 vs Outubro 2025)
 
-        // Montar último 5 meses mesmo sem gasto
+        // ============================================================
+        // 🔹 MONTA OS ÚLTIMOS 5 MESES (MESMO SEM GASTO)
+        // ============================================================
         $labels = [];
         $valores = [];
 
         for ($i = 4; $i >= 0; $i--) {
-            $mesCarbon = Carbon::now()->subMonths($i);
-            $mesNumero = intval($mesCarbon->format('m'));
 
-            $labels[] = ucfirst($mesCarbon->translatedFormat('M'));
+            $data = Carbon::now()->subMonths($i);
+            $chave = $data->format('Y-m'); // exemplo: 2025-10
 
-            $valores[] = isset($gastosMensaisBrutos[$mesNumero])
-                ? floatval($gastosMensaisBrutos[$mesNumero]->total)
+            // Nome do mês para o gráfico
+            $labels[] = ucfirst($data->translatedFormat('M'));
+
+            // Se existir gasto naquele mês, usa; senão, 0
+            $valores[] = isset($gastosMensaisBrutos[$chave])
+                ? floatval($gastosMensaisBrutos[$chave]->total)
                 : 0;
         }
-
 
         // ============================================================
         // 🔹 DISTRIBUIÇÃO POR CATEGORIA (GRÁFICO HORIZONTAL)
